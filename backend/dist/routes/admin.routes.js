@@ -163,6 +163,18 @@ export async function registerAdminRoutes(app) {
                     rating: Number(vendor.rating),
                     verified: vendor.verified,
                 })),
+                lowStockProducts: lowStockProducts.map(product => ({
+                    id: product.id,
+                    title: product.title,
+                    stock: product.stockQuantity,
+                    vendorId: product.vendorId,
+                })),
+                pendingVendors: pendingVendors.map(vendor => ({
+                    id: vendor.id,
+                    name: vendor.storeName,
+                    verified: vendor.verified,
+                    rating: Number(vendor.rating),
+                })),
                 recentOrders: recentOrders.map(order => ({
                     id: order.orderNumber,
                     customer: order.customer.fullName,
@@ -182,6 +194,61 @@ export async function registerAdminRoutes(app) {
             success: true,
             data: storefrontSections,
             meta: { total: storefrontSections.length },
+        };
+    });
+    app.post('/admin/products', { preHandler: requirePermissions(['admin.access']) }, async (request) => {
+        const body = request.body;
+        const firstCategory = await prisma.category.findFirst();
+        const firstVendor = await prisma.vendorProfile.findFirst();
+        const categoryId = body.categoryId ?? firstCategory?.id ?? '';
+        const vendorId = body.vendorId ?? firstVendor?.id ?? '';
+        const slug = body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
+        const sku = 'SKU-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+        const product = await prisma.product.create({
+            data: {
+                title: body.title,
+                slug,
+                sku,
+                description: body.description ?? '',
+                status: body.status?.toUpperCase() ?? 'PUBLISHED',
+                price: body.price,
+                salePrice: body.price,
+                discountPct: body.discount ?? 0,
+                stockQuantity: body.stock ?? 10,
+                freeShipping: body.freeShipping ?? false,
+                featured: body.badge === 'bestseller' || body.badge === 'flash',
+                vendorId,
+                categoryId,
+            },
+            include: {
+                category: true,
+                vendor: true,
+                images: true,
+            },
+        });
+        return {
+            success: true,
+            data: {
+                id: product.id,
+                title: product.title,
+                vendor: product.vendor.storeName,
+                vendorId: product.vendorId,
+                verified: product.vendor.verified,
+                rating: Number(product.rating),
+                reviewCount: product.reviewCount,
+                price: Number(product.salePrice ?? product.price),
+                originalPrice: Number(product.price),
+                discount: product.discountPct,
+                image: body.image ?? product.images[0]?.url ?? '',
+                images: body.images ?? product.images.map(img => img.url),
+                category: product.category.name,
+                categorySlug: product.category.slug,
+                freeShipping: product.freeShipping,
+                stock: product.stockQuantity,
+                installment: body.installment,
+                description: product.description,
+                status: product.status.toLowerCase(),
+            },
         };
     });
 }

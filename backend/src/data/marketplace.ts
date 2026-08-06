@@ -341,3 +341,10 @@ export const storefrontSections: StorefrontSection[] = [
   { id: 's3', type: 'Product Carousel', label: 'Trending Now', visible: true, scheduled: false, order: 3 },
   { id: 's4', type: 'Flash Sale', label: 'Flash Sale', visible: true, scheduled: true, order: 4 },
 ]
+
+export const brands = [
+  { id: 'b1', name: 'Sony', slug: 'sony' },
+  { id: 'b2', name: 'Nike', slug: 'nike' },
+  { id: 'b3', name: 'Apple', slug: 'apple' },
+  { id: 'b4', name: 'Samsung', slug: 'samsung' },
+]

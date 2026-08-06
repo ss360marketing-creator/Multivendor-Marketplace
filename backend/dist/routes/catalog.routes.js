@@ -81,6 +81,7 @@ export async function registerCatalogRoutes(app) {
         const products = await prisma.product.findMany({
             take: Number.isFinite(limit) ? limit : 20,
             where: {
+                ...(query.vendorId ? { vendorId: query.vendorId } : {}),
                 ...(query.category
                     ? {
                         category: {

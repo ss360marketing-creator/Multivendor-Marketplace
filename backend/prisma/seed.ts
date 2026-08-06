@@ -59,33 +59,32 @@ function slugify(value: string) {
 }
 
 async function main() {
-  await prisma.$transaction(async tx => {
-    await tx.auditLog.deleteMany()
-    await tx.session.deleteMany()
-    await tx.userRoleAssignment.deleteMany()
-    await tx.rolePermission.deleteMany()
-    await tx.permission.deleteMany()
-    await tx.role.deleteMany()
-    await tx.payment.deleteMany()
-    await tx.shipment.deleteMany()
-    await tx.orderItem.deleteMany()
-    await tx.order.deleteMany()
-    await tx.inventoryMovement.deleteMany()
-    await tx.wishlistItem.deleteMany()
-    await tx.review.deleteMany()
-    await tx.productVariant.deleteMany()
-    await tx.productImage.deleteMany()
-    await tx.product.deleteMany()
-    await tx.vendorProfile.deleteMany()
-    await tx.customerProfile.deleteMany()
-    await tx.address.deleteMany()
-    await tx.brand.deleteMany()
-    await tx.category.deleteMany()
-    await tx.user.deleteMany()
+    await prisma.auditLog.deleteMany()
+    await prisma.session.deleteMany()
+    await prisma.userRoleAssignment.deleteMany()
+    await prisma.rolePermission.deleteMany()
+    await prisma.permission.deleteMany()
+    await prisma.role.deleteMany()
+    await prisma.payment.deleteMany()
+    await prisma.shipment.deleteMany()
+    await prisma.orderItem.deleteMany()
+    await prisma.order.deleteMany()
+    await prisma.inventoryMovement.deleteMany()
+    await prisma.wishlistItem.deleteMany()
+    await prisma.review.deleteMany()
+    await prisma.productVariant.deleteMany()
+    await prisma.productImage.deleteMany()
+    await prisma.product.deleteMany()
+    await prisma.vendorProfile.deleteMany()
+    await prisma.customerProfile.deleteMany()
+    await prisma.address.deleteMany()
+    await prisma.brand.deleteMany()
+    await prisma.category.deleteMany()
+    await prisma.user.deleteMany()
 
     const roles = await Promise.all(
       roleDefinitions.map(role =>
-        tx.role.create({
+        prisma.role.create({
           data: role,
         }),
       ),
@@ -93,7 +92,7 @@ async function main() {
 
     const permissions = await Promise.all(
       permissionDefinitions.map(permission =>
-        tx.permission.create({
+        prisma.permission.create({
           data: permission,
         }),
       ),
@@ -128,7 +127,7 @@ async function main() {
       const permission = permissions.find(entry => entry.slug === pair.permissionSlug)
 
       if (role && permission) {
-        await tx.rolePermission.create({
+        await prisma.rolePermission.create({
           data: {
             roleId: role.id,
             permissionId: permission.id,
@@ -140,7 +139,7 @@ async function main() {
     const adminPasswordHash = await hashPassword('seeded-password')
     const customerPasswordHash = await hashPassword('seeded-password')
 
-    const adminUser = await tx.user.create({
+    const adminUser = await prisma.user.create({
       data: {
         email: 'admin@marketplace.local',
         fullName: 'Marketplace Admin',
@@ -150,7 +149,7 @@ async function main() {
       },
     })
 
-    const customerUser = await tx.user.create({
+    const customerUser = await prisma.user.create({
       data: {
         email: 'sarah@example.com',
         fullName: 'Sarah Mitchell',
@@ -162,7 +161,7 @@ async function main() {
 
     const vendorUsers = await Promise.all(
       seedVendors.map(vendor =>
-        tx.user.create({
+        prisma.user.create({
           data: {
             email: vendor.email,
             fullName: vendor.owner,
@@ -176,7 +175,7 @@ async function main() {
 
     const vendorProfiles = await Promise.all(
       seedVendors.map((vendor, index) =>
-        tx.vendorProfile.create({
+        prisma.vendorProfile.create({
           data: {
             userId: vendorUsers[index].id,
             storeName: vendor.name,
@@ -197,7 +196,7 @@ async function main() {
 
     const categoryRecords = await Promise.all(
       categories.map(category =>
-        tx.category.create({
+        prisma.category.create({
           data: {
             name: category.name,
             slug: category.slug,
@@ -212,7 +211,7 @@ async function main() {
 
     const brandRecords = await Promise.all(
       brands.map(brand =>
-        tx.brand.create({
+        prisma.brand.create({
           data: {
             name: brand.name,
             slug: brand.slug,
@@ -223,7 +222,7 @@ async function main() {
 
     const productRecords = await Promise.all(
       seedProducts.map((product, index) =>
-        tx.product.create({
+        prisma.product.create({
           data: {
             vendorId: vendorProfiles[index % vendorProfiles.length].id,
             categoryId:
@@ -277,7 +276,7 @@ async function main() {
       const order = seedOrders[index]
       const product = productRecords[index % productRecords.length]
 
-      await tx.order.create({
+      await prisma.order.create({
         data: {
           orderNumber: order.id,
           customerId: customerUser.id,
@@ -318,7 +317,7 @@ async function main() {
       })
     }
 
-    await tx.customerProfile.create({
+    await prisma.customerProfile.create({
       data: {
         userId: customerUser.id,
         loyaltyPoints: 420,
@@ -326,7 +325,7 @@ async function main() {
       },
     })
 
-    await tx.userRoleAssignment.createMany({
+    await prisma.userRoleAssignment.createMany({
       data: [
         {
           userId: adminUser.id,
@@ -347,7 +346,7 @@ async function main() {
       skipDuplicates: true,
     })
 
-    await tx.session.create({
+    await prisma.session.create({
       data: {
         userId: adminUser.id,
         tokenHash: 'seeded-admin-session',
@@ -356,7 +355,6 @@ async function main() {
         expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
       },
     })
-  })
 
   console.log('Seed completed successfully.')
   console.log({
