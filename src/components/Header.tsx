@@ -100,7 +100,7 @@ export default function Header({ cartCount, wishlistCount = 0, onCartOpen, onNav
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span>Deliver to: New York</span>
+              <span>Deliver to: Karachi, Pakistan (PKR)</span>
             </button>
           </div>
           <div className="flex items-center gap-6 text-[#9CA3AF]">

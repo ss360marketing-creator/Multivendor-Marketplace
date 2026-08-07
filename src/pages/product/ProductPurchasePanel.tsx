@@ -50,10 +50,10 @@ export default function ProductPurchasePanel({
 
       <div className="bg-white rounded-2xl p-5 border border-[#E8E7E2] space-y-2">
         <div className="flex items-end gap-3">
-          <span className="font-mono font-black text-4xl text-[#0E0E0E]">${product.price}</span>
+          <span className="font-mono font-black text-4xl text-[#0E0E0E]">Rs. {product.price.toLocaleString()}</span>
           {product.originalPrice > product.price && (
             <>
-              <span className="font-mono text-lg text-[#9CA3AF] line-through mb-1">${product.originalPrice}</span>
+              <span className="font-mono text-lg text-[#9CA3AF] line-through mb-1">Rs. {product.originalPrice.toLocaleString()}</span>
               <span className="bg-[#E11D48] text-white text-sm font-bold px-2.5 py-1 rounded-lg mb-1">{product.discount}% OFF</span>
             </>
           )}

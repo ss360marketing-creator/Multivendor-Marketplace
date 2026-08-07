@@ -108,9 +108,9 @@ export default function ProductCard({ product, wishlisted = false, onToggleWishl
           <p className="text-xs text-[#6B6A66] truncate">{product.vendor}</p>
           <p className="text-sm font-semibold line-clamp-2 leading-snug">{product.title}</p>
           <div className="flex items-center gap-2">
-            <span className="font-mono font-bold text-sm">${product.price}</span>
+            <span className="font-mono font-bold text-sm">Rs. {product.price.toLocaleString()}</span>
             {product.originalPrice > product.price && (
-              <span className="font-mono text-xs text-[#6B6A66] line-through">${product.originalPrice}</span>
+              <span className="font-mono text-xs text-[#6B6A66] line-through">Rs. {product.originalPrice.toLocaleString()}</span>
             )}
           </div>
         </div>
@@ -195,9 +195,9 @@ export default function ProductCard({ product, wishlisted = false, onToggleWishl
 
         <div className="mt-auto pt-1 space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-mono font-bold text-[17px] text-[#0E0E0E]">${product.price}</span>
+            <span className="font-mono font-bold text-[17px] text-[#0E0E0E]">Rs. {product.price.toLocaleString()}</span>
             {product.originalPrice > product.price && (
-              <span className="font-mono text-sm text-[#6B6A66] line-through">${product.originalPrice}</span>
+              <span className="font-mono text-sm text-[#6B6A66] line-through">Rs. {product.originalPrice.toLocaleString()}</span>
             )}
           </div>
           {product.installment && (

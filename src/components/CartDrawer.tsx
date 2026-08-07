@@ -119,7 +119,7 @@ export default function CartDrawer({ open, onClose, items, onRemove, onUpdateQua
                           <p className="text-sm font-medium text-[#0E0E0E] line-clamp-2 leading-snug">{item.title}</p>
                           {item.variant && <p className="text-xs text-[#9CA3AF]">{item.variant}</p>}
                           <div className="flex items-center justify-between">
-                            <span className="font-mono font-bold text-sm">${(item.price * item.quantity).toFixed(2)}</span>
+                            <span className="font-mono font-bold text-sm">Rs. {(item.price * item.quantity).toLocaleString()}</span>
                             <div className="flex items-center gap-1.5">
                               <button
                                 onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
@@ -160,7 +160,7 @@ export default function CartDrawer({ open, onClose, items, onRemove, onUpdateQua
             <div className="border-t border-[#E8E7E2] px-6 py-5 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-[#6B6A66]">Subtotal ({items.reduce((s, i) => s + i.quantity, 0)} items)</span>
-                <span className="font-mono font-bold text-lg">${subtotal.toFixed(2)}</span>
+                <span className="font-mono font-bold text-lg">Rs. {subtotal.toLocaleString()}</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <button

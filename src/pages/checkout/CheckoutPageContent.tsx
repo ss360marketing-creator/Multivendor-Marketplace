@@ -11,9 +11,9 @@ type Props = {
 type Step = 1 | 2 | 3 | 4
 type PaymentMethod = 'card' | 'cod' | 'bank'
 
-const SHIPPING_FEE = 9.99
-const TAX_RATE = 0.08
-const FREE_SHIPPING_THRESHOLD = 75
+const SHIPPING_FEE = 250
+const TAX_RATE = 0.05
+const FREE_SHIPPING_THRESHOLD = 5000
 
 const stepLabels: Record<Step, string> = {
   1: 'Address',
@@ -499,7 +499,7 @@ export default function CheckoutPageContent({ items, onNavigate, onClearCart }: 
                       {item.variant && <p className="text-[11px] text-[#9CA3AF]">{item.variant}</p>}
                     </div>
                     <span className="font-mono font-bold text-xs text-[#0E0E0E] flex-shrink-0">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      Rs. {(item.price * item.quantity).toLocaleString()}
                     </span>
                   </div>
                 ))}
@@ -508,21 +508,21 @@ export default function CheckoutPageContent({ items, onNavigate, onClearCart }: 
               <div className="border-t border-[#E8E7E2] pt-4 space-y-2.5 text-sm">
                 <div className="flex justify-between">
                   <span className="text-[#6B6A66]">Subtotal</span>
-                  <span className="font-mono font-semibold text-[#0E0E0E]">${subtotal.toFixed(2)}</span>
+                  <span className="font-mono font-semibold text-[#0E0E0E]">Rs. {subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#6B6A66]">Shipping ({shipMethod})</span>
                   <span className={`font-mono font-semibold ${shipCost === 0 ? 'text-[#059669]' : 'text-[#0E0E0E]'}`}>
-                    {shipCost === 0 ? 'FREE' : `$${shipCost.toFixed(2)}`}
+                    {shipCost === 0 ? 'FREE' : `Rs. ${shipCost.toLocaleString()}`}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#6B6A66]">Est. Tax</span>
-                  <span className="font-mono font-semibold text-[#0E0E0E]">${tax.toFixed(2)}</span>
+                  <span className="font-mono font-semibold text-[#0E0E0E]">Rs. {tax.toLocaleString()}</span>
                 </div>
                 <div className="border-t border-[#E8E7E2] pt-3 flex justify-between">
                   <span className="font-bold text-[#0E0E0E]">Total</span>
-                  <span className="font-mono font-bold text-xl text-[#0E0E0E]">${total.toFixed(2)}</span>
+                  <span className="font-mono font-bold text-xl text-[#0E0E0E]">Rs. {total.toLocaleString()}</span>
                 </div>
               </div>
 

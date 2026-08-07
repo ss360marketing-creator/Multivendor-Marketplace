@@ -82,10 +82,10 @@ export default function OrdersAdmin({ onNavigate: _ }: Props) {
           setItems(mapped)
         } else {
           setItems([
-            { id: 'ORD-98214', customer: 'Sarah Johnson', vendor: 'SoundVault', product: 'Sony WH-1000XM5 Wireless Headphones', amount: 369.98, status: 'delivered', payment: 'Stripe', date: '2026-08-02', items: 2 },
-            { id: 'ORD-97812', customer: 'James Wilson', vendor: 'SneakerHead', product: 'Nike Air Max 270 Sneakers', amount: 129.50, status: 'shipped', payment: 'COD', date: '2026-07-28', items: 1, trackingNumber: 'TRK-992018' },
-            { id: 'ORD-96501', customer: 'Priya Sharma', vendor: 'HomeCraft', product: 'Minimalist Ceramic Tea Set', amount: 89.00, status: 'processing', payment: 'Bank Transfer', date: '2026-07-14', items: 1 },
-            { id: 'ORD-95400', customer: 'Ahmed Raza', vendor: 'iZone Official', product: 'MacBook Air M3 13"', amount: 1099.00, status: 'pending', payment: 'PayPal', date: '2026-07-10', items: 1 },
+            { id: 'ORD-98214', customer: 'Sarah Johnson', vendor: 'SoundVault', product: 'Sony WH-1000XM5 Wireless Headphones', amount: 84999, status: 'delivered', payment: 'Stripe', date: '2026-08-02', items: 2 },
+            { id: 'ORD-97812', customer: 'James Wilson', vendor: 'SneakerHead', product: 'Nike Air Max 270 Sneakers', amount: 24999, status: 'shipped', payment: 'COD', date: '2026-07-28', items: 1, trackingNumber: 'TRK-992018' },
+            { id: 'ORD-96501', customer: 'Priya Sharma', vendor: 'HomeCraft', product: 'Minimalist Ceramic Tea Set', amount: 14500, status: 'processing', payment: 'Bank Transfer', date: '2026-07-14', items: 1 },
+            { id: 'ORD-95400', customer: 'Ahmed Raza', vendor: 'iZone Official', product: 'MacBook Air M3 13"', amount: 389999, status: 'pending', payment: 'PayPal', date: '2026-07-10', items: 1 },
           ])
         }
         setError(null)
@@ -240,7 +240,7 @@ export default function OrdersAdmin({ onNavigate: _ }: Props) {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Gross Volume', value: `$${kpis.totalRev.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: 'text-[#111118]' },
+          { label: 'Total Gross Volume', value: `Rs. ${kpis.totalRev.toLocaleString()}`, color: 'text-[#111118]' },
           { label: 'Processing Queue', value: kpis.processing.toString(), color: 'text-[#D97706]' },
           { label: 'Shipped / In Transit', value: kpis.shipped.toString(), color: 'text-[#1E40AF]' },
           { label: 'Delivered Successfully', value: kpis.delivered.toString(), color: 'text-[#059669]' },
@@ -369,7 +369,7 @@ export default function OrdersAdmin({ onNavigate: _ }: Props) {
                       <p className="text-[11px] text-[#9B9BB8]">{order.items} item{order.items > 1 ? 's' : ''}</p>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="font-mono font-bold text-[#111118]">${order.amount.toFixed(2)}</span>
+                      <span className="font-mono font-bold text-[#111118]">Rs. {order.amount.toLocaleString()}</span>
                     </td>
                     <td className="px-4 py-3.5">
                       <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${PAYMENT[order.payment] ?? 'bg-[#F4F4F8] text-[#6B6B82]'}`}>

@@ -90,7 +90,7 @@ export default function OrderDetailsModal({ order, onClose, onUpdateStatus, onUp
                   <p className="font-semibold text-[#111118]">{order.customer}</p>
                   <p className="text-[#6B6B82]">{order.customerDetails?.email ?? 'customer@example.com'}</p>
                   <p className="text-[#6B6B82]">{order.customerDetails?.phone ?? '+1 (555) 019-2831'}</p>
-                  <p className="text-[#6B6B82] mt-1">123 Logistics Ave, Suite 400, New York, NY 10001</p>
+                  <p className="text-[#6B6B82] mt-1">Gulshan-e-Iqbal, Block 13-D, Karachi, Pakistan</p>
                 </div>
                 <div>
                   <p className="font-bold text-[#111118] uppercase tracking-wide text-[10px] mb-1">Vendor / Seller:</p>
@@ -115,27 +115,27 @@ export default function OrderDetailsModal({ order, onClose, onUpdateStatus, onUp
                       <tr key={idx}>
                         <td className="py-2 font-medium text-[#111118]">{li.product.title}</td>
                         <td className="py-2 text-center font-mono">{li.quantity}</td>
-                        <td className="py-2 text-right font-mono">${li.unitPrice.toFixed(2)}</td>
-                        <td className="py-2 text-right font-mono font-bold">${(li.quantity * li.unitPrice).toFixed(2)}</td>
+                        <td className="py-2 text-right font-mono">Rs. {li.unitPrice.toLocaleString()}</td>
+                        <td className="py-2 text-right font-mono font-bold">Rs. {(li.quantity * li.unitPrice).toLocaleString()}</td>
                       </tr>
                     ))
                   ) : (
                     <tr>
                       <td className="py-2 font-medium text-[#111118]">{order.product}</td>
                       <td className="py-2 text-center font-mono">{order.items}</td>
-                      <td className="py-2 text-right font-mono">${(order.amount / order.items).toFixed(2)}</td>
-                      <td className="py-2 text-right font-mono font-bold">${order.amount.toFixed(2)}</td>
+                      <td className="py-2 text-right font-mono">Rs. {(order.amount / order.items).toLocaleString()}</td>
+                      <td className="py-2 text-right font-mono font-bold">Rs. {order.amount.toLocaleString()}</td>
                     </tr>
                   )}
                 </tbody>
               </table>
 
               <div className="border-t border-[#E2E2EC] pt-4 flex justify-between items-end text-xs">
-                <p className="text-[#9B9BB8]">Thank you for shopping on Nexus Marketplace.</p>
+                <p className="text-[#9B9BB8]">Thank you for shopping on Salman Marketplace.</p>
                 <div className="text-right space-y-1">
-                  <p className="text-[#6B6B82]">Subtotal: ${(order.amount * 0.9).toFixed(2)}</p>
-                  <p className="text-[#6B6B82]">Est. Tax & Shipping: ${(order.amount * 0.1).toFixed(2)}</p>
-                  <p className="font-mono font-bold text-base text-[#111118]">Total: ${order.amount.toFixed(2)}</p>
+                  <p className="text-[#6B6B82]">Subtotal: Rs. {(order.amount * 0.95).toLocaleString()}</p>
+                  <p className="text-[#6B6B82]">Est. Tax & Shipping: Rs. {(order.amount * 0.05).toLocaleString()}</p>
+                  <p className="font-mono font-bold text-base text-[#111118]">Total: Rs. {order.amount.toLocaleString()}</p>
                 </div>
               </div>
             </div>
