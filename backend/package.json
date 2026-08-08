@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "postinstall": "npx prisma generate",
-    "build": "npx prisma generate && tsc -p tsconfig.json",
+    "postinstall": "node node_modules/prisma/build/index.js generate || prisma generate",
+    "build": "node node_modules/prisma/build/index.js generate && tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "prisma:generate": "npx prisma generate",
     "prisma:format": "prisma format",
