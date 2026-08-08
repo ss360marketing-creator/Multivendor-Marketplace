@@ -5,14 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "postinstall": "node node_modules/prisma/build/index.js generate || prisma generate",
+    "postinstall": "node node_modules/prisma/build/index.js generate",
     "build": "node node_modules/prisma/build/index.js generate && tsc -p tsconfig.json",
     "start": "node dist/server.js",
-    "prisma:generate": "npx prisma generate",
-    "prisma:format": "prisma format",
-    "prisma:studio": "prisma studio",
-    "db:push": "prisma db push",
-    "db:seed": "prisma db seed"
+    "prisma:generate": "node node_modules/prisma/build/index.js generate",
+    "prisma:format": "node node_modules/prisma/build/index.js format",
+    "prisma:studio": "node node_modules/prisma/build/index.js studio",
+    "db:push": "node node_modules/prisma/build/index.js db push",
+    "db:seed": "node node_modules/prisma/build/index.js db seed"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.0",
