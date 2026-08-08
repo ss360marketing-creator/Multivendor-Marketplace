@@ -392,74 +392,106 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
 
           {/* ── TAB 3: MEDIA & GALLERY ── */}
           {activeTab === 'media' && (
-            <div className="space-y-5">
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wide text-[#111118]">Primary Cover Image</label>
-                <p className="text-xs text-[#9B9BB8] mb-2">Upload a cover image file from your computer or enter an image URL</p>
-                
-                <div className="flex flex-col sm:flex-row gap-3">
+            <div className="space-y-6">
+              {/* 1. Primary Cover Image Upload Dropzone */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#111118]">
+                    Primary Cover Image <span className="text-[#E11D48]">*</span>
+                  </label>
+                  {primaryImage && <span className="text-xs font-bold text-[#059669]">✓ Cover Selected</span>}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Dropzone Box */}
+                  <label className="sm:col-span-2 relative flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#E8450A]/40 hover:border-[#E8450A] bg-[#FFF7F5] rounded-2xl cursor-pointer transition-all hover:bg-[#FFEFEA] group text-center min-h-[140px]">
+                    <input type="file" accept="image/*" onChange={handlePrimaryFileUpload} className="hidden" />
+                    <div className="w-12 h-12 rounded-full bg-[#E8450A]/10 flex items-center justify-center text-[#E8450A] mb-2 group-hover:scale-110 transition-transform">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-bold text-[#111118]">Click to Upload Primary Cover Image</p>
+                    <p className="text-xs text-[#6B6B82] mt-0.5">Select image file from computer (PNG, JPG, WEBP)</p>
+                  </label>
+
+                  {/* Primary Preview Card */}
+                  <div className="relative aspect-square rounded-2xl overflow-hidden border-2 border-[#E2E2EC] bg-[#F9F9FC] flex flex-col items-center justify-center shadow-sm">
+                    {primaryImage ? (
+                      <>
+                        <img src={primaryImage} alt="Primary Preview" className="w-full h-full object-cover" />
+                        <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-[10px] font-bold py-1 text-center">
+                          Primary Cover
+                        </div>
+                      </>
+                    ) : (
+                      <span className="text-xs text-[#9B9BB8] font-medium text-center p-3">No Cover Uploaded</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* URL Input */}
+                <div className="flex gap-2">
                   <input
                     type="url"
-                    placeholder="https://images.unsplash.com/..."
+                    placeholder="Or paste primary image URL (https://...)"
                     value={primaryImage}
                     onChange={e => setPrimaryImage(e.target.value)}
-                    className="flex-1 h-11 px-4 rounded-xl border border-[#E2E2EC] bg-[#F9F9FC] text-sm text-[#111118] outline-none focus:border-[#E8450A]"
+                    className="flex-1 h-10 px-3 rounded-xl border border-[#E2E2EC] bg-[#F9F9FC] text-sm text-[#111118] outline-none focus:border-[#E8450A]"
                   />
-                  <label className="cursor-pointer px-4 h-11 bg-[#E8450A] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-[#C93A07] transition-all flex-shrink-0 shadow-sm">
-                    <input type="file" accept="image/*" onChange={handlePrimaryFileUpload} className="hidden" />
-                    📁 Upload Primary File
-                  </label>
                 </div>
-              </div>
 
-              {/* Presets */}
-              <div>
-                <p className="text-xs font-semibold text-[#6B6B82] mb-2">Or Pick a High-Res Preset:</p>
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                  {PRESET_IMAGES.map(p => (
-                    <button
-                      type="button"
-                      key={p.label}
-                      onClick={() => setPrimaryImage(p.url)}
-                      className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all group ${
-                        primaryImage === p.url ? 'border-[#E8450A] ring-2 ring-[#E8450A]/30' : 'border-[#E2E2EC]'
-                      }`}
-                    >
-                      <img src={p.url} alt={p.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                      <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] font-bold text-center py-0.5 truncate">
-                        {p.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Cover Preview */}
-              {primaryImage && (
-                <div className="p-4 rounded-2xl bg-[#F9F9FC] border border-[#E2E2EC] flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-white border border-[#E2E2EC] flex-shrink-0 shadow-sm">
-                    <img src={primaryImage} alt="Cover preview" className="w-full h-full object-cover" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-[#059669] flex items-center gap-1">
-                      <span>✓</span> Primary Cover Image Set
-                    </p>
-                    <p className="text-xs text-[#6B6B82] mt-0.5">This image will be displayed on product cards, catalog search, and main banner.</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Additional Gallery Images */}
-              <div className="pt-4 border-t border-[#E2E2EC] space-y-3">
+                {/* Presets */}
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-[#111118]">Gallery Images (Multiple Upload)</label>
-                  <p className="text-xs text-[#9B9BB8] mt-0.5">Upload multiple product shots or paste image URLs to populate the gallery slider</p>
+                  <p className="text-xs font-semibold text-[#6B6B82] mb-2">Or Select High-Res Demo Preset:</p>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    {PRESET_IMAGES.map(p => (
+                      <button
+                        type="button"
+                        key={p.label}
+                        onClick={() => setPrimaryImage(p.url)}
+                        className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all group ${
+                          primaryImage === p.url ? 'border-[#E8450A] ring-2 ring-[#E8450A]/30' : 'border-[#E2E2EC]'
+                        }`}
+                      >
+                        <img src={p.url} alt={p.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] font-bold text-center py-0.5 truncate">
+                          {p.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Gallery Images Multi-Upload Section */}
+              <div className="pt-5 border-t border-[#E2E2EC] space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-[#111118]">
+                      Product Gallery ({galleryImages.length} Pictures)
+                    </label>
+                    <p className="text-xs text-[#9B9BB8] mt-0.5">Upload multiple product shots for the interactive gallery slider</p>
+                  </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2">
+                {/* Multi-File Upload Dropzone */}
+                <label className="relative flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#059669]/40 hover:border-[#059669] bg-[#F0FDF4] rounded-2xl cursor-pointer transition-all hover:bg-[#DCFCE7] group text-center">
+                  <input type="file" accept="image/*" multiple onChange={handleGalleryFilesUpload} className="hidden" />
+                  <div className="w-12 h-12 rounded-full bg-[#059669]/10 flex items-center justify-center text-[#059669] mb-2 group-hover:scale-110 transition-transform">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-bold text-[#111118]">Click to Upload Multiple Gallery Pictures</p>
+                  <p className="text-xs text-[#059669] font-medium mt-0.5">Select multiple picture files at once from your computer 📁</p>
+                </label>
+
+                {/* URL Input */}
+                <div className="flex gap-2">
                   <input
                     type="url"
-                    placeholder="Paste image URL here..."
+                    placeholder="Or paste additional gallery image URL..."
                     value={newGalleryUrl}
                     onChange={e => setNewGalleryUrl(e.target.value)}
                     className="flex-1 h-10 px-3 rounded-xl border border-[#E2E2EC] bg-[#F9F9FC] text-sm text-[#111118] outline-none focus:border-[#E8450A]"
@@ -469,23 +501,20 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
                     onClick={handleAddGalleryImage}
                     className="px-4 h-10 rounded-xl bg-[#111118] text-white text-xs font-bold hover:bg-[#E8450A] transition-colors"
                   >
-                    + Add URL
+                    + Add Image URL
                   </button>
-                  <label className="cursor-pointer px-4 h-10 bg-[#059669] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-[#047857] transition-all flex-shrink-0">
-                    <input type="file" accept="image/*" multiple onChange={handleGalleryFilesUpload} className="hidden" />
-                    📁 Upload Multiple Files
-                  </label>
                 </div>
 
+                {/* Thumbnail Grid */}
                 {galleryImages.length > 0 ? (
-                  <div className="mt-3 grid grid-cols-4 sm:grid-cols-6 gap-3">
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
                     {galleryImages.map((imgUrl, idx) => (
                       <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-[#E2E2EC] group shadow-sm">
                         <img src={imgUrl} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
                         <button
                           type="button"
                           onClick={() => handleRemoveGalleryImage(idx)}
-                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold flex items-center justify-center shadow-md transition-transform hover:scale-110"
+                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center shadow-md hover:bg-red-700 transition-transform hover:scale-110"
                           title="Remove image"
                         >
                           ✕
@@ -495,7 +524,7 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
                   </div>
                 ) : (
                   <div className="p-6 rounded-2xl border-2 border-dashed border-[#E2E2EC] text-center bg-[#F9F9FC]">
-                    <p className="text-xs text-[#9B9BB8]">No gallery images added yet. Upload files or add URLs above.</p>
+                    <p className="text-xs text-[#9B9BB8]">No gallery pictures added yet. Upload files or paste URLs above.</p>
                   </div>
                 )}
               </div>
