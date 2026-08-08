@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from 'react'
-import { getMe, login, logout, type AuthPermissions, type AuthUser } from '@/api/marketplace'
+import { getMe, login, logout, registerUser, type AuthPermissions, type AuthUser } from '@/api/marketplace'
 
 type SessionState = {
   token: string | null
@@ -7,6 +7,7 @@ type SessionState = {
   permissions: AuthPermissions
   status: 'loading' | 'anonymous' | 'authenticated'
   signIn: (email: string, password: string) => Promise<{ ok: boolean; message?: string }>
+  signUp: (payload: { email: string; password: string; fullName: string; phone?: string }) => Promise<{ ok: boolean; message?: string }>
   signOut: () => Promise<void>
   refresh: () => Promise<void>
 }
@@ -120,6 +121,22 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         }
 
         return { ok: false, message: 'Invalid credentials.' }
+      },
+      signUp: async (payload) => {
+        try {
+          const response = await registerUser(payload)
+          if (response.success) {
+            localStorage.setItem(STORAGE_KEY, response.data.accessToken)
+            setToken(response.data.accessToken)
+            setUser(response.data.user)
+            setPermissions(response.data.permissions)
+            setStatus('authenticated')
+            return { ok: true }
+          }
+        } catch {
+          // Fallback if offline
+        }
+        return { ok: false, message: 'Registration failed. Email may already exist.' }
       },
       signOut: async () => {
         if (token && token !== 'demo-admin-token') {

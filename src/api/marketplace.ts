@@ -83,10 +83,17 @@ export type AdminDashboardSummary = {
   }>
 }
 
-export async function login(email: string, password: string) {
+export function login(email: string, password?: string) {
   return apiRequest<AuthSessionResponse>('/api/v1/auth/login', {
     method: 'POST',
     body: { email, password },
+  })
+}
+
+export function registerUser(payload: { email: string; password: string; fullName: string; phone?: string }) {
+  return apiRequest<AuthSessionResponse>('/api/v1/auth/register', {
+    method: 'POST',
+    body: payload,
   })
 }
 
