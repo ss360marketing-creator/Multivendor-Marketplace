@@ -101,6 +101,34 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
     setGalleryImages(prev => prev.filter((_, i) => i !== idx))
   }
 
+  const handlePrimaryFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setPrimaryImage(event.target.result as string)
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleGalleryFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files.length > 0) {
+      Array.from(files).forEach(file => {
+        const reader = new FileReader()
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setGalleryImages(prev => [...prev, event.target!.result as string])
+          }
+        }
+        reader.readAsDataURL(file)
+      })
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim()) {
@@ -366,8 +394,10 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
           {activeTab === 'media' && (
             <div className="space-y-5">
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wide text-[#111118]">Primary Cover Image URL</label>
-                <div className="mt-1.5 flex gap-3">
+                <label className="text-xs font-semibold uppercase tracking-wide text-[#111118]">Primary Cover Image</label>
+                <p className="text-xs text-[#9B9BB8] mb-2">Upload a cover image file from your computer or enter an image URL</p>
+                
+                <div className="flex flex-col sm:flex-row gap-3">
                   <input
                     type="url"
                     placeholder="https://images.unsplash.com/..."
@@ -375,12 +405,16 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
                     onChange={e => setPrimaryImage(e.target.value)}
                     className="flex-1 h-11 px-4 rounded-xl border border-[#E2E2EC] bg-[#F9F9FC] text-sm text-[#111118] outline-none focus:border-[#E8450A]"
                   />
+                  <label className="cursor-pointer px-4 h-11 bg-[#E8450A] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-[#C93A07] transition-all flex-shrink-0 shadow-sm">
+                    <input type="file" accept="image/*" onChange={handlePrimaryFileUpload} className="hidden" />
+                    📁 Upload Primary File
+                  </label>
                 </div>
               </div>
 
               {/* Presets */}
               <div>
-                <p className="text-xs font-semibold text-[#6B6B82] mb-2">Or Pick a High-Res Unsplash Preset:</p>
+                <p className="text-xs font-semibold text-[#6B6B82] mb-2">Or Pick a High-Res Preset:</p>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {PRESET_IMAGES.map(p => (
                     <button
@@ -403,23 +437,29 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
               {/* Cover Preview */}
               {primaryImage && (
                 <div className="p-4 rounded-2xl bg-[#F9F9FC] border border-[#E2E2EC] flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-white border border-[#E2E2EC] flex-shrink-0">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-white border border-[#E2E2EC] flex-shrink-0 shadow-sm">
                     <img src={primaryImage} alt="Cover preview" className="w-full h-full object-cover" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-[#059669]">✓ Primary Cover Set</p>
-                    <p className="text-xs text-[#6B6B82] mt-0.5">This image will appear on catalog grids and top thumbnail.</p>
+                    <p className="text-xs font-bold text-[#059669] flex items-center gap-1">
+                      <span>✓</span> Primary Cover Image Set
+                    </p>
+                    <p className="text-xs text-[#6B6B82] mt-0.5">This image will be displayed on product cards, catalog search, and main banner.</p>
                   </div>
                 </div>
               )}
 
               {/* Additional Gallery Images */}
-              <div className="pt-3 border-t border-[#E2E2EC]">
-                <label className="text-xs font-semibold uppercase tracking-wide text-[#111118]">Gallery Images (Thumbnail Slider)</label>
-                <div className="mt-2 flex gap-2">
+              <div className="pt-4 border-t border-[#E2E2EC] space-y-3">
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-[#111118]">Gallery Images (Multiple Upload)</label>
+                  <p className="text-xs text-[#9B9BB8] mt-0.5">Upload multiple product shots or paste image URLs to populate the gallery slider</p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="url"
-                    placeholder="Add additional image URL..."
+                    placeholder="Paste image URL here..."
                     value={newGalleryUrl}
                     onChange={e => setNewGalleryUrl(e.target.value)}
                     className="flex-1 h-10 px-3 rounded-xl border border-[#E2E2EC] bg-[#F9F9FC] text-sm text-[#111118] outline-none focus:border-[#E8450A]"
@@ -429,24 +469,35 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
                     onClick={handleAddGalleryImage}
                     className="px-4 h-10 rounded-xl bg-[#111118] text-white text-xs font-bold hover:bg-[#E8450A] transition-colors"
                   >
-                    + Add Image
+                    + Add URL
                   </button>
+                  <label className="cursor-pointer px-4 h-10 bg-[#059669] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-[#047857] transition-all flex-shrink-0">
+                    <input type="file" accept="image/*" multiple onChange={handleGalleryFilesUpload} className="hidden" />
+                    📁 Upload Multiple Files
+                  </label>
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-3">
-                  {galleryImages.map((imgUrl, idx) => (
-                    <div key={idx} className="relative w-16 h-16 rounded-xl overflow-hidden border border-[#E2E2EC] group">
-                      <img src={imgUrl} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveGalleryImage(idx)}
-                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-600 text-white text-xs flex items-center justify-center opacity-90 hover:opacity-100"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                {galleryImages.length > 0 ? (
+                  <div className="mt-3 grid grid-cols-4 sm:grid-cols-6 gap-3">
+                    {galleryImages.map((imgUrl, idx) => (
+                      <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-[#E2E2EC] group shadow-sm">
+                        <img src={imgUrl} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveGalleryImage(idx)}
+                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold flex items-center justify-center shadow-md transition-transform hover:scale-110"
+                          title="Remove image"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-6 rounded-2xl border-2 border-dashed border-[#E2E2EC] text-center bg-[#F9F9FC]">
+                    <p className="text-xs text-[#9B9BB8]">No gallery images added yet. Upload files or add URLs above.</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

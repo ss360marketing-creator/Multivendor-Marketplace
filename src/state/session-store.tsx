@@ -48,21 +48,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    // Check if token is demo-admin-token
-    if (sessionToken === 'demo-admin-token') {
-      setToken('demo-admin-token')
-      setUser(MOCK_ADMIN_USER)
-      setPermissions(MOCK_PERMISSIONS)
-      setStatus('authenticated')
-      return
-    }
-
     setStatus('loading')
     try {
       const response = await getMe(sessionToken)
 
       if (!response.success) {
-        // Fallback if token matches demo
         localStorage.removeItem(STORAGE_KEY)
         setToken(null)
         setUser(null)
@@ -76,11 +66,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setPermissions(response.data.permissions)
       setStatus('authenticated')
     } catch {
-      // Backend offline fallback for dev
-      setToken('demo-admin-token')
-      setUser(MOCK_ADMIN_USER)
-      setPermissions(MOCK_PERMISSIONS)
-      setStatus('authenticated')
+      localStorage.removeItem(STORAGE_KEY)
+      setToken(null)
+      setUser(null)
+      setPermissions([])
+      setStatus('anonymous')
     }
   }
 
@@ -105,22 +95,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             setPermissions(response.data.permissions)
             setStatus('authenticated')
             return { ok: true }
+          } else {
+            return { ok: false, message: response.error?.message || 'Invalid email or password.' }
           }
         } catch {
-          // If backend offline, accept seeded credentials or fallback to demo
+          return { ok: false, message: 'Server is currently starting up. Please retry in a few seconds.' }
         }
-
-        // Demo fallback
-        if (email.toLowerCase().includes('admin') || password === 'seeded-password' || true) {
-          localStorage.setItem(STORAGE_KEY, 'demo-admin-token')
-          setToken('demo-admin-token')
-          setUser(MOCK_ADMIN_USER)
-          setPermissions(MOCK_PERMISSIONS)
-          setStatus('authenticated')
-          return { ok: true }
-        }
-
-        return { ok: false, message: 'Invalid credentials.' }
       },
       signUp: async (payload) => {
         try {
