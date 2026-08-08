@@ -93,3 +93,8 @@ export declare const categoryRevenue: {
 }[];
 export declare const alerts: DashboardAlert[];
 export declare const storefrontSections: StorefrontSection[];
+export declare const brands: {
+    id: string;
+    name: string;
+    slug: string;
+}[];
