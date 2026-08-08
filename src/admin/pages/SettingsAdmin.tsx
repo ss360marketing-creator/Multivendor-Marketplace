@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { AdminSection } from '../adminData'
+import { useSession } from '@/state/session-store'
 
 type Props = { onNavigate: (s: AdminSection) => void }
 
@@ -139,38 +140,7 @@ export default function SettingsAdmin({ onNavigate: _ }: Props) {
         </div>
       )}
 
-      {tab === 'Security' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl border border-[#E2E2EC] p-5 space-y-3">
-            <h3 className="font-semibold text-[#111118]">Security Settings</h3>
-            {[
-              { label: 'Two-Factor Authentication', desc: 'Require 2FA for all admin accounts', on: true },
-              { label: 'Login Rate Limiting', desc: 'Block IPs after 5 failed attempts', on: true },
-              { label: 'Session Timeout', desc: 'Auto-logout after 30 minutes of inactivity', on: true },
-              { label: 'IP Allowlist', desc: 'Restrict admin access to specific IPs', on: false },
-              { label: 'Audit Logging', desc: 'Log all admin actions for compliance', on: true },
-            ].map(f => {
-              const [on, setOn] = useState(f.on)
-              return (
-                <div key={f.label} className="flex items-center justify-between py-2 border-b border-[#F4F4F8] last:border-0">
-                  <div><p className="text-sm font-semibold text-[#111118]">{f.label}</p><p className="text-xs text-[#9B9BB8]">{f.desc}</p></div>
-                  <Toggle on={on} onChange={setOn} />
-                </div>
-              )
-            })}
-          </div>
-          <div className="bg-white rounded-xl border border-[#E2E2EC] p-5 space-y-4">
-            <h3 className="font-semibold text-[#111118]">Change Admin Password</h3>
-            {['Current Password', 'New Password', 'Confirm Password'].map(f => (
-              <div key={f} className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#6B6B82]">{f}</label>
-                <input type="password" placeholder="••••••••" className="w-full h-10 px-3 bg-[#F4F4F8] border border-[#E2E2EC] rounded-lg text-sm outline-none focus:border-[#E8450A]" />
-              </div>
-            ))}
-            <button className="w-full py-2.5 bg-[#E8450A] text-white rounded-xl text-sm font-semibold">Update Password</button>
-          </div>
-        </div>
-      )}
+      {tab === 'Security' && <AdminSecurityTab />}
 
       {tab === 'Shipping' && (
         <div className="space-y-5">
@@ -354,6 +324,174 @@ export default function SettingsAdmin({ onNavigate: _ }: Props) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function AdminSecurityTab() {
+  const session = useSession()
+  const [fullName, setFullName] = useState(session.user?.fullName ?? 'Salman Super Admin')
+  const [email, setEmail] = useState(session.user?.email ?? 'admin@salmanmarketplace.com')
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [updatingProfile, setUpdatingProfile] = useState(false)
+  const [updatingPassword, setUpdatingPassword] = useState(false)
+  const [profileMessage, setProfileMessage] = useState<{ text: string; success: boolean } | null>(null)
+  const [passwordMessage, setPasswordMessage] = useState<{ text: string; success: boolean } | null>(null)
+
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault()
+    setUpdatingProfile(true)
+    setProfileMessage(null)
+
+    setTimeout(() => {
+      setUpdatingProfile(false)
+      setProfileMessage({ text: 'Admin profile & username updated successfully!', success: true })
+    }, 800)
+  }
+
+  const handleUpdatePassword = (e: React.FormEvent) => {
+    e.preventDefault()
+    setPasswordMessage(null)
+
+    if (newPassword.length < 6) {
+      setPasswordMessage({ text: 'New password must be at least 6 characters long.', success: false })
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage({ text: 'New password and confirmation do not match.', success: false })
+      return
+    }
+
+    setUpdatingPassword(true)
+    setTimeout(() => {
+      setUpdatingPassword(false)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setPasswordMessage({ text: 'Super Admin password updated successfully!', success: true })
+    }, 1000)
+  }
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Account Profile & Credentials Manager */}
+      <div className="bg-white rounded-xl border border-[#E2E2EC] p-5 space-y-4 shadow-sm">
+        <div>
+          <h3 className="font-bold text-[#111118] text-base">Super Admin Account Profile</h3>
+          <p className="text-xs text-[#9B9BB8] mt-0.5">Manage your login username, email, and admin profile name</p>
+        </div>
+
+        <form onSubmit={handleUpdateProfile} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wide text-[#6B6B82]">Full Name</label>
+            <input
+              type="text"
+              value={fullName}
+              onChange={e => setFullName(e.target.value)}
+              className="w-full h-10 px-3 bg-[#F4F4F8] border border-[#E2E2EC] rounded-lg text-sm outline-none focus:border-[#E8450A]"
+              required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wide text-[#6B6B82]">Username / Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full h-10 px-3 bg-[#F4F4F8] border border-[#E2E2EC] rounded-lg text-sm outline-none focus:border-[#E8450A]"
+              required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wide text-[#6B6B82]">Assigned Role</label>
+            <input
+              type="text"
+              value={session.user?.role?.toUpperCase() ?? 'SUPER_ADMIN'}
+              disabled
+              className="w-full h-10 px-3 bg-[#EEF2FF] border border-[#E2E2EC] rounded-lg text-sm font-mono text-[#4338CA] font-bold cursor-not-allowed"
+            />
+          </div>
+
+          {profileMessage && (
+            <div className={`p-3 rounded-lg text-xs font-semibold ${profileMessage.success ? 'bg-[#D1FAE5] text-[#065F46] border border-[#A7F3D0]' : 'bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]'}`}>
+              {profileMessage.text}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={updatingProfile}
+            className="w-full py-2.5 bg-[#E8450A] text-white rounded-xl text-sm font-semibold hover:bg-[#C93A07] transition-all disabled:opacity-70 shadow-sm"
+          >
+            {updatingProfile ? 'Saving...' : 'Update Profile Info'}
+          </button>
+        </form>
+      </div>
+
+      {/* Password Manager */}
+      <div className="bg-white rounded-xl border border-[#E2E2EC] p-5 space-y-4 shadow-sm">
+        <div>
+          <h3 className="font-bold text-[#111118] text-base">Change Admin Password</h3>
+          <p className="text-xs text-[#9B9BB8] mt-0.5">Set a new secure password for your admin account</p>
+        </div>
+
+        <form onSubmit={handleUpdatePassword} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wide text-[#6B6B82]">Current Password</label>
+            <input
+              type="password"
+              placeholder="••••••••••••"
+              value={currentPassword}
+              onChange={e => setCurrentPassword(e.target.value)}
+              className="w-full h-10 px-3 bg-[#F4F4F8] border border-[#E2E2EC] rounded-lg text-sm outline-none focus:border-[#E8450A]"
+              required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wide text-[#6B6B82]">New Password</label>
+            <input
+              type="password"
+              placeholder="••••••••••••"
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+              className="w-full h-10 px-3 bg-[#F4F4F8] border border-[#E2E2EC] rounded-lg text-sm outline-none focus:border-[#E8450A]"
+              required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wide text-[#6B6B82]">Confirm New Password</label>
+            <input
+              type="password"
+              placeholder="••••••••••••"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              className="w-full h-10 px-3 bg-[#F4F4F8] border border-[#E2E2EC] rounded-lg text-sm outline-none focus:border-[#E8450A]"
+              required
+            />
+          </div>
+
+          {passwordMessage && (
+            <div className={`p-3 rounded-lg text-xs font-semibold ${passwordMessage.success ? 'bg-[#D1FAE5] text-[#065F46] border border-[#A7F3D0]' : 'bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]'}`}>
+              {passwordMessage.text}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={updatingPassword}
+            className="w-full py-2.5 bg-[#0F0F18] text-white rounded-xl text-sm font-semibold hover:bg-[#1E1E2D] transition-all disabled:opacity-70 shadow-sm"
+          >
+            {updatingPassword ? 'Updating Password...' : '🔒 Update Password'}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

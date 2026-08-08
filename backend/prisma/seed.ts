@@ -136,13 +136,13 @@ async function main() {
       }
     }
 
-    const adminPasswordHash = await hashPassword('seeded-password')
-    const customerPasswordHash = await hashPassword('seeded-password')
+    const adminPasswordHash = await hashPassword('AdminPassword123!')
+    const customerPasswordHash = await hashPassword('AdminPassword123!')
 
     const adminUser = await prisma.user.create({
       data: {
-        email: 'admin@marketplace.local',
-        fullName: 'Marketplace Admin',
+        email: 'admin@salmanmarketplace.com',
+        fullName: 'Salman Super Admin',
         role: 'SUPER_ADMIN',
         status: 'ACTIVE',
         passwordHash: adminPasswordHash,

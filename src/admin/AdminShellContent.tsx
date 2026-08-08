@@ -97,8 +97,8 @@ export default function AdminShellContent({ onExitAdmin }: Props) {
   const [collapsed, setCollapsed] = useState(false)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Overview', 'Storefront', 'Catalog', 'Sales', 'Vendors', 'Marketing']))
   const [notifOpen, setNotifOpen] = useState(false)
-  const [email, setEmail] = useState('admin@marketplace.local')
-  const [password, setPassword] = useState('seeded-password')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState<string | null>(null)
   const [loggingIn, setLoggingIn] = useState(false)
 
@@ -120,10 +120,10 @@ export default function AdminShellContent({ onExitAdmin }: Props) {
     return (
       <div className="min-h-screen bg-[#F4F4F8] flex items-center justify-center px-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
         <div className="w-full max-w-md rounded-3xl border border-[#E2E2EC] bg-white p-8 shadow-[0_20px_80px_rgba(15,15,24,0.08)]">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#9B9BB8]">Admin Access</p>
-          <h1 className="mt-3 text-3xl font-black text-[#111118]">Sign in to the marketplace admin</h1>
+          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#9B9BB8]">Admin Portal</p>
+          <h1 className="mt-3 text-3xl font-black text-[#111118]">Salman Marketplace Admin</h1>
           <p className="mt-2 text-sm text-[#6B6B82]">
-            Use the seeded development account to load live dashboard data and RBAC-protected CRUD routes.
+            Enter your Super Admin credentials to access the marketplace control panel.
           </p>
 
           <form
@@ -135,20 +135,21 @@ export default function AdminShellContent({ onExitAdmin }: Props) {
 
               const result = await session.signIn(email, password)
               if (!result.ok) {
-                setLoginError(result.message ?? 'Unable to sign in.')
+                setLoginError(result.message ?? 'Unable to sign in. Please verify your email and password.')
               }
 
               setLoggingIn(false)
             }}
           >
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-wide text-[#6B6B82]">Email</label>
+              <label className="text-xs font-semibold uppercase tracking-wide text-[#6B6B82]">Email Address</label>
               <input
                 value={email}
                 onChange={event => setEmail(event.target.value)}
                 className="w-full h-11 rounded-xl border border-[#E2E2EC] bg-[#F9F9FC] px-4 text-sm outline-none transition-colors focus:border-[#E8450A]"
-                placeholder="admin@marketplace.local"
+                placeholder="admin@salmanmarketplace.com"
                 type="email"
+                required
               />
             </div>
 
@@ -158,8 +159,9 @@ export default function AdminShellContent({ onExitAdmin }: Props) {
                 value={password}
                 onChange={event => setPassword(event.target.value)}
                 className="w-full h-11 rounded-xl border border-[#E2E2EC] bg-[#F9F9FC] px-4 text-sm outline-none transition-colors focus:border-[#E8450A]"
-                placeholder="seeded-password"
+                placeholder="••••••••••••"
                 type="password"
+                required
               />
             </div>
 
@@ -169,33 +171,14 @@ export default function AdminShellContent({ onExitAdmin }: Props) {
               </div>
             )}
 
-            <div className="space-y-2">
-              <button
-                type="submit"
-                disabled={loggingIn}
-                className="w-full rounded-xl bg-[#E8450A] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#C93A07] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {loggingIn ? 'Signing in...' : 'Sign In'}
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  setLoggingIn(true)
-                  await session.signIn('admin@marketplace.local', 'seeded-password')
-                  setLoggingIn(false)
-                }}
-                className="w-full rounded-xl border border-[#E2E2EC] bg-[#F9F9FC] px-4 py-3 text-sm font-semibold text-[#111118] transition-colors hover:bg-[#EEF2FF] hover:text-[#6366F1]"
-              >
-                ⚡ Instant Demo Login (No Backend Needed)
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={loggingIn}
+              className="w-full rounded-xl bg-[#E8450A] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#C93A07] disabled:cursor-not-allowed disabled:opacity-70 shadow-lg shadow-[#E8450A]/20"
+            >
+              {loggingIn ? 'Signing in...' : 'Sign In'}
+            </button>
           </form>
-
-          <div className="mt-6 rounded-2xl bg-[#0F0F18] p-4 text-white">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#8A8AA3]">Dev account</p>
-            <p className="mt-2 font-mono text-sm">admin@marketplace.local</p>
-            <p className="font-mono text-sm">seeded-password</p>
-          </div>
         </div>
       </div>
     )
