@@ -26,9 +26,21 @@ const Toggle = ({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
 export default function SettingsAdmin({ onNavigate: _ }: Props) {
   const [tab, setTab] = useState('General')
   const [payments, setPayments] = useState(paymentMethods)
+  const [saving, setSaving] = useState(false)
+  const [savedSuccess, setSavedSuccess] = useState(false)
 
   const togglePayment = (id: string) => {
     setPayments(prev => prev.map(p => p.id === id ? { ...p, enabled: !p.enabled } : p))
+  }
+
+  const handleSaveAll = () => {
+    setSaving(true)
+    setSavedSuccess(false)
+    setTimeout(() => {
+      setSaving(false)
+      setSavedSuccess(true)
+      setTimeout(() => setSavedSuccess(false), 3000)
+    }, 600)
   }
 
   return (
@@ -38,7 +50,20 @@ export default function SettingsAdmin({ onNavigate: _ }: Props) {
           <h1 className="text-2xl font-bold text-[#111118]">Settings</h1>
           <p className="text-sm text-[#6B6B82] mt-0.5">Platform configuration and preferences</p>
         </div>
-        <button className="px-4 py-2 bg-[#E8450A] text-white rounded-xl text-sm font-semibold hover:bg-[#C93A07]">Save Changes</button>
+        <div className="flex items-center gap-3">
+          {savedSuccess && (
+            <span className="text-xs font-bold text-[#059669] bg-[#D1FAE5] border border-[#A7F3D0] px-3 py-1.5 rounded-lg animate-fade-in">
+              ✓ Settings Saved!
+            </span>
+          )}
+          <button
+            onClick={handleSaveAll}
+            disabled={saving}
+            className="px-4 py-2 bg-[#E8450A] text-white rounded-xl text-sm font-semibold hover:bg-[#C93A07] transition-colors disabled:opacity-70"
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}

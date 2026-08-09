@@ -141,9 +141,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 export function useSession() {
   const context = useContext(SessionContext)
 
-  if (!context) {
-    throw new Error('useSession must be used within a SessionProvider')
-  }
-
-  return context
+  return (
+    context ?? {
+      token: null,
+      user: null,
+      permissions: [],
+      status: 'anonymous' as const,
+      signIn: async () => ({ ok: false, message: 'Auth context not ready' }),
+      signUp: async () => ({ ok: false, message: 'Auth context not ready' }),
+      signOut: async () => {},
+    }
+  )
 }
