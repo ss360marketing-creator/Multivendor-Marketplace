@@ -136,9 +136,21 @@ function toVendor(
   }
 }
 
+function getSavedCustomProducts(): Product[] {
+  try {
+    const raw = localStorage.getItem('custom_added_products')
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
 export function CatalogProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState(fallbackCategories)
-  const [products, setProducts] = useState(fallbackProducts)
+  const [products, setProducts] = useState<Product[]>(() => {
+    const custom = getSavedCustomProducts()
+    return [...custom, ...fallbackProducts]
+  })
   const [vendors, setVendors] = useState(fallbackVendors)
   const [orders, setOrders] = useState<CatalogOrder[]>([])
   const [loading, setLoading] = useState(true)
@@ -150,20 +162,28 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
 
     const [categoryResponse, productResponse, vendorResponse, orderResponse] = await Promise.all([
       listCategories(),
-      listProducts({ limit: 24 }),
+      listProducts({ limit: 50 }),
       listVendors(),
       listOrders(),
     ])
 
-    if (categoryResponse.success) {
+    if (categoryResponse.success && categoryResponse.data.length > 0) {
       setCategories(categoryResponse.data.map((category, index) => toCategory(category, index)))
     }
 
-    if (productResponse.success) {
-      setProducts(productResponse.data.map((product, index) => toProduct(product, index)))
+    const customSaved = getSavedCustomProducts()
+
+    if (productResponse.success && productResponse.data.length > 0) {
+      const liveProds = productResponse.data.map((product, index) => toProduct(product, index))
+      // Combine live products with custom added products, avoiding duplicates by ID
+      const existingIds = new Set(liveProds.map(p => p.id))
+      const extraCustom = customSaved.filter(p => !existingIds.has(p.id))
+      setProducts([...extraCustom, ...liveProds])
+    } else {
+      setProducts([...customSaved, ...fallbackProducts])
     }
 
-    if (vendorResponse.success) {
+    if (vendorResponse.success && vendorResponse.data.length > 0) {
       setVendors(vendorResponse.data.map((vendor, index) => toVendor(vendor, index)))
     }
 
@@ -187,7 +207,17 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const addProduct = (newProduct: Product) => {
-    setProducts(prev => [newProduct, ...prev])
+    setProducts(prev => {
+      const updated = [newProduct, ...prev.filter(p => p.id !== newProduct.id)]
+      try {
+        const custom = getSavedCustomProducts()
+        const newCustom = [newProduct, ...custom.filter(p => p.id !== newProduct.id)]
+        localStorage.setItem('custom_added_products', JSON.stringify(newCustom))
+      } catch {
+        // Fallback
+      }
+      return updated
+    })
   }
 
   const value = useMemo<CatalogContextValue>(

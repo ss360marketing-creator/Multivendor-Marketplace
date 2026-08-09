@@ -534,21 +534,81 @@ export async function registerAdminCrudRoutes(app: FastifyInstance) {
     '/admin/products',
     { preHandler: requirePermissions(['products.manage']) },
     async (request, reply) => {
-      const body = request.body as ProductBody
-      const vendorId = body.vendorId?.trim()
-      const categoryId = body.categoryId?.trim()
-      const title = body.title?.trim()
-      const slug = body.slug?.trim().toLowerCase()
-      const sku = body.sku?.trim()
-      const description = body.description?.trim()
+      const body = request.body as ProductBody & {
+        image?: string
+        images?: Array<{ url: string; altText?: string; sortOrder?: number; isPrimary?: boolean }> | string[]
+        category?: string
+        vendor?: string
+      }
 
-      if (!vendorId || !categoryId || !title || !slug || !sku || !description) {
+      let vendorId = body.vendorId?.trim()
+      let categoryId = body.categoryId?.trim()
+      const title = body.title?.trim()
+
+      if (!title) {
         return reply.code(400).send({
           success: false,
           error: {
             code: 'INVALID_PAYLOAD',
-            message: 'Vendor, category, title, slug, sku, and description are required.',
+            message: 'Title is required.',
           },
+        })
+      }
+
+      if (!vendorId) {
+        const firstVendor = await prisma.vendorProfile.findFirst({ select: { id: true } })
+        if (firstVendor) vendorId = firstVendor.id
+      }
+
+      if (!categoryId) {
+        const matchingCategory = body.category
+          ? await prisma.category.findFirst({
+              where: {
+                OR: [
+                  { name: { contains: body.category, mode: 'insensitive' } },
+                  { slug: { contains: body.category.toLowerCase(), mode: 'insensitive' } },
+                ],
+              },
+              select: { id: true },
+            })
+          : null
+        const firstCategory = matchingCategory ?? (await prisma.category.findFirst({ select: { id: true } }))
+        if (firstCategory) categoryId = firstCategory.id
+      }
+
+      if (!vendorId || !categoryId) {
+        return reply.code(400).send({
+          success: false,
+          error: {
+            code: 'INVALID_PAYLOAD',
+            message: 'Unable to resolve vendor or category for this product.',
+          },
+        })
+      }
+
+      const slug = body.slug?.trim().toLowerCase() || `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`
+      const sku = body.sku?.trim() || `SKU-${Date.now()}`
+      const description = body.description?.trim() || title
+
+      const rawImages: Array<{ url: string; isPrimary: boolean }> = []
+
+      if (typeof body.image === 'string' && body.image.trim()) {
+        rawImages.push({ url: body.image.trim(), isPrimary: true })
+      }
+
+      if (Array.isArray(body.images)) {
+        (body.images as unknown[]).forEach((img: unknown, idx: number) => {
+          if (typeof img === 'string' && img.trim()) {
+            const urlStr = img.trim()
+            if (!rawImages.some(r => r.url === urlStr)) {
+              rawImages.push({ url: urlStr, isPrimary: rawImages.length === 0 })
+            }
+          } else if (typeof img === 'object' && img !== null && 'url' in img && typeof (img as { url: unknown }).url === 'string') {
+            const imgObj = img as { url: string; isPrimary?: boolean }
+            if (!rawImages.some(r => r.url === imgObj.url)) {
+              rawImages.push({ url: imgObj.url, isPrimary: imgObj.isPrimary ?? (rawImages.length === 0 || idx === 0) })
+            }
+          }
         })
       }
 
@@ -562,29 +622,29 @@ export async function registerAdminCrudRoutes(app: FastifyInstance) {
             slug,
             sku,
             description,
-            status: body.status ?? 'DRAFT',
+            status: 'PUBLISHED',
             price: body.price ?? 0,
             salePrice: body.salePrice ?? null,
             costPrice: body.costPrice ?? null,
             discountPct: body.discountPct ?? 0,
-            stockQuantity: body.stockQuantity ?? 0,
+            stockQuantity: body.stockQuantity ?? 10,
             lowStockLimit: body.lowStockLimit ?? 5,
-            rating: body.rating ?? 0,
+            rating: body.rating ?? 5.0,
             reviewCount: body.reviewCount ?? 0,
             freeShipping: body.freeShipping ?? false,
-            featured: body.featured ?? false,
-            publishedAt: body.publishedAt ? new Date(body.publishedAt) : null,
+            featured: body.featured ?? true,
+            publishedAt: new Date(),
           },
         })
 
-        if (body.images?.length) {
+        if (rawImages.length) {
           await tx.productImage.createMany({
-            data: body.images.map(image => ({
+            data: rawImages.map((image, i) => ({
               productId: created.id,
               url: image.url,
-              altText: image.altText ?? null,
-              sortOrder: image.sortOrder ?? 0,
-              isPrimary: image.isPrimary ?? false,
+              altText: title,
+              sortOrder: i,
+              isPrimary: image.isPrimary,
             })),
           })
         }

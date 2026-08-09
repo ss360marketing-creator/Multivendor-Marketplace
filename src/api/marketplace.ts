@@ -255,3 +255,38 @@ export async function listVendorProducts(vendorId: string) {
     installment?: string
   }>>(`/api/v1/catalog/products?vendorId=${encodeURIComponent(vendorId)}&limit=24`)
 }
+
+export async function createOrder(payload: {
+  customerName?: string
+  customerEmail?: string
+  customerPhone?: string
+  shippingAddress?: {
+    name?: string
+    line1?: string
+    city?: string
+    phone?: string
+  }
+  paymentMethod?: string
+  items?: Array<{
+    productId?: string
+    title?: string
+    price?: number
+    quantity?: number
+    vendorId?: string
+  }>
+  totalAmount?: number
+}, token?: string | null) {
+  return apiRequest<{
+    id: string
+    orderNumber: string
+    customer: string
+    amount: number
+    status: string
+    payment: string
+    date: string
+  }>('/api/v1/orders', {
+    method: 'POST',
+    body: payload,
+    token,
+  })
+}

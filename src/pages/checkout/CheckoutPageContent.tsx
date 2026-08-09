@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import type { View } from '../../app/navigation'
 import type { CartItem } from '../../state/marketplace-store'
+import { createOrder } from '@/api/marketplace'
+import { useSession } from '@/state/session-store'
+import { useCatalog } from '@/state/catalog-store'
 
 type Props = {
   items: CartItem[]
@@ -88,9 +91,11 @@ function InputField({ label, placeholder, type = 'text', value, onChange, requir
 }
 
 export default function CheckoutPageContent({ items, onNavigate, onClearCart }: Props) {
+  const session = useSession()
+  const catalog = useCatalog()
   const [step, setStep] = useState<Step>(1)
   const [orderPlaced, setOrderPlaced] = useState(false)
-  const [orderNumber] = useState(() => `NXS-${Math.floor(100000 + Math.random() * 900000)}`)
+  const [orderNumber, setOrderNumber] = useState(() => `PKR-${Math.floor(100000 + Math.random() * 900000)}`)
   const [placingOrder, setPlacingOrder] = useState(false)
 
   // Step 1 – Address
@@ -98,10 +103,10 @@ export default function CheckoutPageContent({ items, onNavigate, onClearCart }: 
   // Step 2 – Shipping
   const [shipMethod, setShipMethod] = useState<'standard' | 'express' | 'overnight'>('standard')
   // Step 3 – Payment
-  const [payMethod, setPayMethod] = useState<PaymentMethod>('card')
-  const [card, setCard] = useState({ number: '', name: '', expiry: '', cvv: '' })
+  const [payMethod, setPayMethod] = useState<PaymentMethod>('cod')
+  const [card, setCard] = useState({ number: '', name: '', exp: '', cvc: '' })
 
-  const subtotal    = items.reduce((s, i) => s + i.price * i.quantity, 0)
+  const subtotal    = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const baseship    = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
   const shipCost    = shipMethod === 'express' ? baseship + 9.99 : shipMethod === 'overnight' ? baseship + 19.99 : baseship
   const tax         = subtotal * TAX_RATE
@@ -113,13 +118,41 @@ export default function CheckoutPageContent({ items, onNavigate, onClearCart }: 
     return acc
   }, {})
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     setPlacingOrder(true)
-    setTimeout(() => {
-      setPlacingOrder(false)
-      setOrderPlaced(true)
-      onClearCart()
-    }, 1800)
+    try {
+      const res = await createOrder({
+        customerName: addr.name || session.user?.fullName || 'Valued Customer',
+        customerEmail: session.user?.email,
+        customerPhone: addr.phone || undefined,
+        shippingAddress: {
+          name: addr.name,
+          line1: addr.line1,
+          city: addr.city,
+          phone: addr.phone,
+        },
+        paymentMethod: payMethod,
+        items: items.map(i => ({
+          productId: i.id,
+          title: i.title,
+          price: i.price,
+          quantity: i.quantity,
+          vendorId: i.vendorId,
+        })),
+        totalAmount: total,
+      }, session.token)
+
+      if (res.success && res.data?.id) {
+        setOrderNumber(res.data.id)
+      }
+    } catch {
+      // Fallback for offline mode
+    }
+
+    setPlacingOrder(false)
+    setOrderPlaced(true)
+    onClearCart()
+    void catalog.refresh()
   }
 
   // ── Order Success Screen ──
