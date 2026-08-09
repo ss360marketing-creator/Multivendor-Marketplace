@@ -71,6 +71,8 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
   const [newFeatureText, setNewFeatureText] = useState('')
 
   const [status, setStatus] = useState<'PUBLISHED' | 'DRAFT'>('PUBLISHED')
+  const [uploadingPrimary, setUploadingPrimary] = useState(false)
+  const [uploadingGallery, setUploadingGallery] = useState(false)
 
   if (!isOpen) return null
 
@@ -100,9 +102,6 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
   const handleRemoveGalleryImage = (idx: number) => {
     setGalleryImages(prev => prev.filter((_, i) => i !== idx))
   }
-
-  const [uploadingPrimary, setUploadingPrimary] = useState(false)
-  const [uploadingGallery, setUploadingGallery] = useState(false)
 
   const handlePrimaryFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
