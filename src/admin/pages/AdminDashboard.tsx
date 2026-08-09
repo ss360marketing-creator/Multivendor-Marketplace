@@ -8,13 +8,13 @@ import { useSession } from '@/state/session-store'
 type Props = { onNavigate: (s: AdminSection) => void }
 
 const fallbackKpis = [
-  { label: 'Gross Sales', value: '$284,819', change: '+18.4%', up: true, sub: 'vs last 30 days', color: '#E8450A' },
-  { label: 'Net Revenue', value: '$241,284', change: '+12.1%', up: true, sub: 'after commissions', color: '#059669' },
+  { label: 'Gross Sales', value: 'Rs. 284,819', change: '+18.4%', up: true, sub: 'vs last 30 days', color: '#E8450A' },
+  { label: 'Net Revenue', value: 'Rs. 241,284', change: '+12.1%', up: true, sub: 'after commissions', color: '#059669' },
   { label: 'Total Orders', value: '8,429', change: '+22.8%', up: true, sub: '284 today', color: '#6366F1' },
   { label: 'New Customers', value: '1,842', change: '+9.4%', up: true, sub: '48 today', color: '#F59E0B' },
   { label: 'Active Vendors', value: '142', change: '+4.2%', up: true, sub: '3 pending review', color: '#EC4899' },
   { label: 'Products Listed', value: '28,490', change: '+6.8%', up: true, sub: '184 new this week', color: '#14B8A6' },
-  { label: 'Avg Order Value', value: '$147.20', change: '-2.1%', up: false, sub: 'vs $150.42 last month', color: '#8B5CF6' },
+  { label: 'Avg Order Value', value: 'Rs. 147.20', change: '-2.1%', up: false, sub: 'vs Rs. 150.42 last month', color: '#8B5CF6' },
   { label: 'Conversion Rate', value: '3.42%', change: '+0.18%', up: true, sub: 'from 3.24% last month', color: '#E8450A' },
 ]
 
@@ -33,13 +33,13 @@ const CHART_COLORS = ['#E8450A', '#6366F1', '#059669', '#F59E0B', '#EC4899', '#1
 
 function buildKpis(summary: AdminDashboardSummary['summary']) {
   return [
-    { label: 'Gross Sales', value: `$${summary.grossSales.toLocaleString()}`, change: '+0.0%', up: true, sub: 'live from backend', color: '#E8450A' },
-    { label: 'Net Revenue', value: `$${summary.netSales.toLocaleString()}`, change: '+0.0%', up: true, sub: 'live from backend', color: '#059669' },
+    { label: 'Gross Sales', value: `Rs. ${summary.grossSales.toLocaleString()}`, change: '+0.0%', up: true, sub: 'live from backend', color: '#E8450A' },
+    { label: 'Net Revenue', value: `Rs. ${summary.netSales.toLocaleString()}`, change: '+0.0%', up: true, sub: 'live from backend', color: '#059669' },
     { label: 'Total Orders', value: summary.orders.toLocaleString(), change: '+0.0%', up: true, sub: 'live from backend', color: '#6366F1' },
     { label: 'New Customers', value: summary.customers.toLocaleString(), change: '+0.0%', up: true, sub: 'live from backend', color: '#F59E0B' },
     { label: 'Active Vendors', value: summary.vendors.toLocaleString(), change: '+0.0%', up: true, sub: 'live from backend', color: '#EC4899' },
     { label: 'Products Listed', value: summary.products.toLocaleString(), change: '+0.0%', up: true, sub: 'live from backend', color: '#14B8A6' },
-    { label: 'Avg Order Value', value: `$${summary.averageOrderValue.toFixed(2)}`, change: '+0.0%', up: true, sub: 'live from backend', color: '#8B5CF6' },
+    { label: 'Avg Order Value', value: `Rs. ${summary.averageOrderValue.toFixed(2)}`, change: '+0.0%', up: true, sub: 'live from backend', color: '#8B5CF6' },
     { label: 'Conversion Rate', value: `${summary.conversionRate.toFixed(2)}%`, change: '+0.0%', up: true, sub: 'live from backend', color: '#E8450A' },
   ]
 }
@@ -211,11 +211,11 @@ export default function AdminDashboard({ onNavigate }: Props) {
               <CartesianGrid strokeDasharray="3 3" stroke="#F4F4F8" vertical={false} />
               <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9B9BB8' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: '#9B9BB8' }} axisLine={false} tickLine={false}
-                tickFormatter={v => chartTab === 'revenue' ? `$${(v/1000).toFixed(0)}k` : String(v)} />
+                tickFormatter={v => chartTab === 'revenue' ? `Rs. ${(v/1000).toFixed(0)}k` : String(v)} />
               <Tooltip
                 contentStyle={{ background: '#fff', border: '1px solid #E2E2EC', borderRadius: '10px', fontSize: 12 }}
                 labelStyle={{ color: '#111118', fontWeight: 600 }}
-                formatter={(v: unknown) => { const n = Number(v); return chartTab === 'revenue' ? [`$${n.toLocaleString()}`, 'Revenue'] : [n.toLocaleString(), 'Orders'] }}
+                formatter={(v: unknown) => { const n = Number(v); return chartTab === 'revenue' ? [`Rs. ${n.toLocaleString()}`, 'Revenue'] : [n.toLocaleString(), 'Orders'] }}
               />
               <Area
                 type="monotone"
@@ -243,7 +243,7 @@ export default function AdminDashboard({ onNavigate }: Props) {
               </Pie>
               <Tooltip
                 contentStyle={{ background: '#fff', border: '1px solid #E2E2EC', borderRadius: '8px', fontSize: 12 }}
-                formatter={(v: unknown) => [`$${(Number(v)/1000).toFixed(0)}k`, '']}
+                formatter={(v: unknown) => [`Rs. ${(Number(v)/1000).toFixed(0)}k`, '']}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -254,7 +254,7 @@ export default function AdminDashboard({ onNavigate }: Props) {
                   <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
                   <span className="text-xs text-[#6B6B82]">{c.name}</span>
                 </div>
-                <span className="text-xs font-mono font-semibold text-[#111118]">${(c.value / 1000).toFixed(0)}k</span>
+                <span className="text-xs font-mono font-semibold text-[#111118]">Rs. {(c.value / 1000).toFixed(0)}k</span>
               </div>
             ))}
           </div>
@@ -292,7 +292,7 @@ export default function AdminDashboard({ onNavigate }: Props) {
                       <p className="text-[11px] text-[#9B9BB8]">{o.vendor}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="font-mono font-bold text-sm text-[#111118]">${o.amount.toLocaleString()}</span>
+                      <span className="font-mono font-bold text-sm text-[#111118]">Rs. {o.amount.toLocaleString()}</span>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${STATUS_COLORS[o.status]}`}>

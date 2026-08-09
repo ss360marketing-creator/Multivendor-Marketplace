@@ -100,18 +100,11 @@ export default function Footer({ onNavigate }: Props) {
       {/* Bottom bar */}
       <div className="border-t border-white/10">
         <div className="max-w-[1280px] mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-[#6B6A66]">© 2025 Nexus Marketplace. All rights reserved.</p>
+          <p className="text-xs text-[#6B6A66]">© 2025 Salman Marketplace. All rights reserved.</p>
           <div className="flex items-center gap-5">
             <button className="text-xs text-[#6B6A66] hover:text-white transition-colors">Privacy Policy</button>
             <button className="text-xs text-[#6B6A66] hover:text-white transition-colors">Terms of Service</button>
             <button className="text-xs text-[#6B6A66] hover:text-white transition-colors">Cookie Settings</button>
-            <button
-              onClick={() => onNavigate({ type: 'admin' })}
-              className="flex items-center gap-1.5 text-xs text-[#6B6A66] hover:text-[#E8450A] transition-colors border border-[#2A2A2A] hover:border-[#E8450A] px-2.5 py-1 rounded-lg"
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 4a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
-              Admin
-            </button>
           </div>
         </div>
       </div>

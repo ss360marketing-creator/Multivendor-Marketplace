@@ -231,13 +231,6 @@ export default function AccountPageContent({
 
             <div className="pt-4 border-t border-[#E8E7E2] mt-4 space-y-1">
               <button
-                onClick={() => onNavigate({ type: 'admin' })}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-[#6366F1] bg-[#EEF2FF] hover:bg-[#E0E7FF] transition-colors"
-              >
-                <span className="text-base">⚡</span>
-                Admin Portal
-              </button>
-              <button
                 onClick={onLogout}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-[#E11D48] hover:bg-[#FFF1F2] transition-colors"
               >

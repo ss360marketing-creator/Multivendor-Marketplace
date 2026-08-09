@@ -106,13 +106,7 @@ export default function Header({ cartCount, wishlistCount = 0, onCartOpen, onNav
           <div className="flex items-center gap-6 text-[#9CA3AF]">
             <button className="transition-colors hover:text-white">Customer Support</button>
             <button className="transition-colors hover:text-white">Track Order</button>
-            <button className="font-semibold text-white transition-colors hover:text-[#E8450A]">Sell on Nexus</button>
-            <button
-              onClick={() => onNavigate({ type: 'admin' })}
-              className="flex items-center gap-1 font-semibold text-[#E8450A] transition-colors hover:text-white bg-[#E8450A]/10 border border-[#E8450A]/40 px-2.5 py-1 rounded-md"
-            >
-              ⚡ Admin Panel
-            </button>
+            <button className="font-semibold text-white transition-colors hover:text-[#E8450A]">Sell on Salman</button>
           </div>
         </div>
       </div>
