@@ -1053,8 +1053,8 @@ export async function registerAdminCrudRoutes(app) {
             const order = await prisma.order.update({
                 where: { orderNumber: id },
                 data: {
-                    ...(body.status ? { status: body.status } : {}),
-                    ...(body.paymentStatus ? { paymentStatus: body.paymentStatus } : {}),
+                    ...(body.status ? { status: (typeof body.status === 'string' ? body.status.toUpperCase() : body.status) } : {}),
+                    ...(body.paymentStatus ? { paymentStatus: (typeof body.paymentStatus === 'string' ? body.paymentStatus.toUpperCase() : body.paymentStatus) } : {}),
                     ...(body.paymentMethod ? { paymentMethod: body.paymentMethod } : {}),
                     ...(body.shippingFee !== undefined ? { shippingFee: body.shippingFee } : {}),
                     ...(body.discountAmount !== undefined ? { discountAmount: body.discountAmount } : {}),

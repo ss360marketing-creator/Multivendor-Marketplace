@@ -53,7 +53,7 @@ export default function CustomersAdmin({ onNavigate: _ }: Props) {
     void (async () => {
       setLoading(true)
       const response = await listAdminCustomers(session.token!, { q: search || undefined, segment: segment === 'all' ? undefined : segment, limit: 100 })
-      if (!cancelled && response.success && response.data.length > 0) {
+      if (!cancelled && response.success) {
         setItems(response.data)
       }
       setLoading(false)

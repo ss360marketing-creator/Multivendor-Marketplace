@@ -57,7 +57,7 @@ export default function OrdersAdmin({ onNavigate: _ }: Props) {
       setLoading(true)
       if (session.token) {
         const response = await listAdminOrders(session.token, { q: search || undefined, status: statusFilter === 'all' ? undefined : statusFilter, limit: 100 })
-        if (!cancelled && response.success && response.data.length > 0) {
+        if (!cancelled && response.success) {
           setItems(response.data)
           setError(null)
           setLoading(false)
@@ -81,12 +81,7 @@ export default function OrdersAdmin({ onNavigate: _ }: Props) {
           }))
           setItems(mapped)
         } else {
-          setItems([
-            { id: 'ORD-98214', customer: 'Sarah Johnson', vendor: 'SoundVault', product: 'Sony WH-1000XM5 Wireless Headphones', amount: 84999, status: 'delivered', payment: 'Stripe', date: '2026-08-02', items: 2 },
-            { id: 'ORD-97812', customer: 'James Wilson', vendor: 'SneakerHead', product: 'Nike Air Max 270 Sneakers', amount: 24999, status: 'shipped', payment: 'COD', date: '2026-07-28', items: 1, trackingNumber: 'TRK-992018' },
-            { id: 'ORD-96501', customer: 'Priya Sharma', vendor: 'HomeCraft', product: 'Minimalist Ceramic Tea Set', amount: 14500, status: 'processing', payment: 'Bank Transfer', date: '2026-07-14', items: 1 },
-            { id: 'ORD-95400', customer: 'Ahmed Raza', vendor: 'iZone Official', product: 'MacBook Air M3 13"', amount: 389999, status: 'pending', payment: 'PayPal', date: '2026-07-10', items: 1 },
-          ])
+          setItems([])
         }
         setError(null)
         setLoading(false)

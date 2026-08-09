@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Prisma, OrderStatus, PaymentStatus } from '@prisma/client'
 import type { FastifyInstance } from 'fastify'
 import { prisma } from '../db/index.js'
 import { requirePermissions } from '../auth/guards.js'
@@ -1376,8 +1376,8 @@ export async function registerAdminCrudRoutes(app: FastifyInstance) {
         const order = await prisma.order.update({
           where: { orderNumber: id },
           data: {
-            ...(body.status ? { status: body.status } : {}),
-            ...(body.paymentStatus ? { paymentStatus: body.paymentStatus } : {}),
+            ...(body.status ? { status: (typeof body.status === 'string' ? body.status.toUpperCase() : body.status) as OrderStatus } : {}),
+            ...(body.paymentStatus ? { paymentStatus: (typeof body.paymentStatus === 'string' ? body.paymentStatus.toUpperCase() : body.paymentStatus) as PaymentStatus } : {}),
             ...(body.paymentMethod ? { paymentMethod: body.paymentMethod } : {}),
             ...(body.shippingFee !== undefined ? { shippingFee: body.shippingFee } : {}),
             ...(body.discountAmount !== undefined ? { discountAmount: body.discountAmount } : {}),

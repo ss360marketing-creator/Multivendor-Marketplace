@@ -40,7 +40,7 @@ export default function VendorsAdmin({ onNavigate }: Props) {
       setLoading(true)
       if (session.token) {
         const response = await listAdminVendors(session.token, { q: search || undefined, status: statusFilter === 'all' ? undefined : statusFilter, limit: 100 })
-        if (!cancelled && response.success && response.data.length > 0) {
+        if (!cancelled && response.success) {
           setItems(response.data)
           setError(null)
           setLoading(false)
@@ -55,7 +55,7 @@ export default function VendorsAdmin({ onNavigate }: Props) {
             id: v.id,
             name: v.name,
             slug: v.id,
-            email: `${v.name.toLowerCase().replace(/\s+/g, '')}@merchant.nexus`,
+            email: `${v.name.toLowerCase().replace(/\s+/g, '')}@salmanmarketplace.com`,
             owner: `${v.name} Owner`,
             logo: v.logo,
             cover: v.cover,
@@ -71,13 +71,8 @@ export default function VendorsAdmin({ onNavigate }: Props) {
           }))
           setItems(mapped)
         } else {
-          setItems([
-            { id: 'v1', name: 'SoundVault', slug: 'soundvault', email: 'soundvault@nexus.market', owner: 'Alex Mercer', logo: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop&auto=format', cover: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200&h=400&fit=crop&auto=format', status: 'active', verified: true, rating: 4.9, productCount: 48, positiveFeedback: 99, followers: 1420, responseTime: '1 hr', tagline: 'Premium Audio & Sound Systems', commissionRate: 10 },
-            { id: 'v2', name: 'TechArmor', slug: 'techarmor', email: 'techarmor@nexus.market', owner: 'David Vance', logo: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=200&h=200&fit=crop&auto=format', cover: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=1200&h=400&fit=crop&auto=format', status: 'active', verified: true, rating: 4.8, productCount: 32, positiveFeedback: 97, followers: 890, responseTime: '2 hrs', tagline: 'Rugged Protection Devices', commissionRate: 8.5 },
-            { id: 'v3', name: 'SneakerHead', slug: 'sneakerhead', email: 'sneakers@nexus.market', owner: 'Marcus Sterling', logo: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=200&fit=crop&auto=format', cover: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=400&fit=crop&auto=format', status: 'review', verified: false, rating: 4.7, productCount: 19, positiveFeedback: 94, followers: 650, responseTime: '3 hrs', tagline: 'Exclusive Footwear Drops', commissionRate: 12 },
-          ])
+          setItems([])
         }
-        setError(null)
         setLoading(false)
       }
     })()
