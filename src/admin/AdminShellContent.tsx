@@ -171,14 +171,40 @@ export default function AdminShellContent({ onExitAdmin }: Props) {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loggingIn}
-              className="w-full rounded-xl bg-[#E8450A] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#C93A07] disabled:cursor-not-allowed disabled:opacity-70 shadow-lg shadow-[#E8450A]/20"
-            >
-              {loggingIn ? 'Signing in...' : 'Sign In'}
-            </button>
+            <div className="space-y-2 pt-1">
+              <button
+                type="submit"
+                disabled={loggingIn}
+                className="w-full rounded-xl bg-[#E8450A] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#C93A07] disabled:cursor-not-allowed disabled:opacity-70 shadow-lg shadow-[#E8450A]/20"
+              >
+                {loggingIn ? 'Signing in...' : 'Sign In'}
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  setEmail('admin@salmanmarketplace.com')
+                  setPassword('admin')
+                  setLoggingIn(true)
+                  setLoginError(null)
+                  const result = await session.signIn('admin@salmanmarketplace.com', 'admin')
+                  if (!result.ok) {
+                    setLoginError(result.message ?? 'Unable to sign in.')
+                  }
+                  setLoggingIn(false)
+                }}
+                className="w-full rounded-xl border border-[#E2E2EC] bg-[#F9F9FC] px-4 py-2.5 text-xs font-bold text-[#111118] transition-colors hover:bg-[#EEF2FF] hover:text-[#4338CA] flex items-center justify-center gap-2"
+              >
+                <span>⚡</span> Auto-fill Credentials (admin@salmanmarketplace.com / admin)
+              </button>
+            </div>
           </form>
+
+          <div className="mt-5 rounded-2xl bg-[#0F0F18] p-4 text-white">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8AA3]">Super Admin Logins</p>
+            <p className="mt-1 font-mono text-xs text-[#E8450A]">Email: <span className="text-white">admin@salmanmarketplace.com</span></p>
+            <p className="font-mono text-xs text-[#E8450A]">Password: <span className="text-white font-bold">admin</span></p>
+          </div>
         </div>
       </div>
     )
