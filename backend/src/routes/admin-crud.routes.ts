@@ -1478,4 +1478,54 @@ export async function registerAdminCrudRoutes(app: FastifyInstance) {
       }
     },
   )
+
+  app.post(
+    '/admin/upload',
+    { preHandler: requirePermissions(['products.manage']) },
+    async (request, reply) => {
+      const body = request.body as { file?: string }
+      const file = body.file?.trim()
+
+      if (!file) {
+        return reply.code(400).send({
+          success: false,
+          error: { code: 'INVALID_PAYLOAD', message: 'File is required.' },
+        })
+      }
+
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'cj0hpbl2'
+      const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET || 'Marketplace'
+
+      try {
+        const formData = new URLSearchParams()
+        formData.append('file', file)
+        formData.append('upload_preset', uploadPreset)
+
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData.toString(),
+        })
+
+        const data = (await res.json()) as { secure_url?: string; error?: { message: string } }
+
+        if (data.secure_url) {
+          return reply.send({
+            success: true,
+            data: { url: data.secure_url },
+          })
+        }
+
+        return reply.code(400).send({
+          success: false,
+          error: { code: 'CLOUDINARY_ERROR', message: data.error?.message || 'Cloudinary upload failed.' },
+        })
+      } catch {
+        return reply.code(500).send({
+          success: false,
+          error: { code: 'UPLOAD_FAILED', message: 'Image upload failed.' },
+        })
+      }
+    },
+  )
 }

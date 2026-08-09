@@ -347,3 +347,22 @@ export function updateAdminPassword(token: string | null, body: { currentPasswor
     body,
   })
 }
+
+export async function uploadAdminImage(fileOrBase64: string | File): Promise<{ success: boolean; url: string }> {
+  const formData = new FormData()
+  formData.append('file', fileOrBase64)
+  formData.append('upload_preset', 'Marketplace')
+
+  const res = await fetch('https://api.cloudinary.com/v1_1/cj0hpbl2/image/upload', {
+    method: 'POST',
+    body: formData,
+  })
+
+  const data = (await res.json()) as { secure_url?: string; error?: { message: string } }
+
+  if (data.secure_url) {
+    return { success: true, url: data.secure_url }
+  }
+
+  throw new Error(data.error?.message || 'Cloudinary upload failed')
+}

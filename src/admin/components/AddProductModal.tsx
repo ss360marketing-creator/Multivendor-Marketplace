@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Product } from '@/data/marketplace'
-import type { AdminProduct } from '@/api/admin'
+import { uploadAdminImage, type AdminProduct } from '@/api/admin'
 
 type Props = {
   isOpen: boolean
@@ -101,31 +101,53 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
     setGalleryImages(prev => prev.filter((_, i) => i !== idx))
   }
 
-  const handlePrimaryFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploadingPrimary, setUploadingPrimary] = useState(false)
+  const [uploadingGallery, setUploadingGallery] = useState(false)
+
+  const handlePrimaryFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setPrimaryImage(event.target.result as string)
+      setUploadingPrimary(true)
+      try {
+        const res = await uploadAdminImage(file)
+        if (res.url) {
+          setPrimaryImage(res.url)
         }
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleGalleryFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (files && files.length > 0) {
-      Array.from(files).forEach(file => {
+      } catch {
         const reader = new FileReader()
         reader.onload = (event) => {
           if (event.target?.result) {
-            setGalleryImages(prev => [...prev, event.target!.result as string])
+            setPrimaryImage(event.target.result as string)
           }
         }
         reader.readAsDataURL(file)
-      })
+      } finally {
+        setUploadingPrimary(false)
+      }
+    }
+  }
+
+  const handleGalleryFilesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files.length > 0) {
+      setUploadingGallery(true)
+      for (const file of Array.from(files)) {
+        try {
+          const res = await uploadAdminImage(file)
+          if (res.url) {
+            setGalleryImages(prev => [...prev, res.url])
+          }
+        } catch {
+          const reader = new FileReader()
+          reader.onload = (event) => {
+            if (event.target?.result) {
+              setGalleryImages(prev => [...prev, event.target!.result as string])
+            }
+          }
+          reader.readAsDataURL(file)
+        }
+      }
+      setUploadingGallery(false)
     }
   }
 
@@ -411,17 +433,26 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                     </div>
-                    <p className="text-sm font-bold text-[#111118]">Click to Upload Primary Cover Image</p>
-                    <p className="text-xs text-[#6B6B82] mt-0.5">Select image file from computer (PNG, JPG, WEBP)</p>
+                    <p className="text-sm font-bold text-[#111118]">
+                      {uploadingPrimary ? '⚡ Uploading to Cloudinary...' : 'Click to Upload Primary Cover Image'}
+                    </p>
+                    <p className="text-xs text-[#6B6B82] mt-0.5">
+                      {uploadingPrimary ? 'Processing CDN image URL...' : 'Select image file from computer (PNG, JPG, WEBP)'}
+                    </p>
                   </label>
 
                   {/* Primary Preview Card */}
                   <div className="relative aspect-square rounded-2xl overflow-hidden border-2 border-[#E2E2EC] bg-[#F9F9FC] flex flex-col items-center justify-center shadow-sm">
-                    {primaryImage ? (
+                    {uploadingPrimary ? (
+                      <div className="flex flex-col items-center gap-2 p-3 text-center">
+                        <div className="w-6 h-6 border-2 border-[#E8450A] border-t-transparent rounded-full animate-spin" />
+                        <span className="text-xs font-bold text-[#E8450A]">Cloudinary Uploading...</span>
+                      </div>
+                    ) : primaryImage ? (
                       <>
                         <img src={primaryImage} alt="Primary Preview" className="w-full h-full object-cover" />
-                        <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-[10px] font-bold py-1 text-center">
-                          Primary Cover
+                        <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-[10px] font-bold py-1 text-center truncate px-1">
+                          {primaryImage.includes('cloudinary') ? '☁️ Cloudinary CDN' : 'Primary Cover'}
                         </div>
                       </>
                     ) : (
@@ -479,12 +510,20 @@ export default function AddProductModal({ isOpen, onClose, onSave }: Props) {
                 <label className="relative flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#059669]/40 hover:border-[#059669] bg-[#F0FDF4] rounded-2xl cursor-pointer transition-all hover:bg-[#DCFCE7] group text-center">
                   <input type="file" accept="image/*" multiple onChange={handleGalleryFilesUpload} className="hidden" />
                   <div className="w-12 h-12 rounded-full bg-[#059669]/10 flex items-center justify-center text-[#059669] mb-2 group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
+                    {uploadingGallery ? (
+                      <div className="w-6 h-6 border-2 border-[#059669] border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                    )}
                   </div>
-                  <p className="text-sm font-bold text-[#111118]">Click to Upload Multiple Gallery Pictures</p>
-                  <p className="text-xs text-[#059669] font-medium mt-0.5">Select multiple picture files at once from your computer 📁</p>
+                  <p className="text-sm font-bold text-[#111118]">
+                    {uploadingGallery ? '⚡ Uploading Gallery to Cloudinary...' : 'Click to Upload Multiple Gallery Pictures'}
+                  </p>
+                  <p className="text-xs text-[#059669] font-medium mt-0.5">
+                    {uploadingGallery ? 'Saving images on Cloudinary CDN...' : 'Select multiple picture files at once from your computer 📁'}
+                  </p>
                 </label>
 
                 {/* URL Input */}
