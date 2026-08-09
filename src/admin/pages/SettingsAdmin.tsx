@@ -16,12 +16,26 @@ const paymentMethods = [
 
 const Toggle = ({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) => (
   <button
+    type="button"
     onClick={() => onChange(!on)}
     className={`relative w-10 h-6 rounded-full transition-all flex-shrink-0 ${on ? 'bg-[#E8450A]' : 'bg-[#D1D5DB]'}`}
   >
     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${on ? 'left-5' : 'left-1'}`} />
   </button>
 )
+
+function FeatureToggleItem({ label, desc, defaultOn }: { label: string; desc?: string; defaultOn: boolean }) {
+  const [on, setOn] = useState(defaultOn)
+  return (
+    <div className="flex items-center justify-between py-2 border-b border-[#F4F4F8] last:border-0">
+      <div>
+        <p className="text-sm font-semibold text-[#111118]">{label}</p>
+        {desc && <p className="text-xs text-[#9B9BB8]">{desc}</p>}
+      </div>
+      <Toggle on={on} onChange={setOn} />
+    </div>
+  )
+}
 
 export default function SettingsAdmin({ onNavigate: _ }: Props) {
   const [tab, setTab] = useState('General')
@@ -113,18 +127,9 @@ export default function SettingsAdmin({ onNavigate: _ }: Props) {
               { label: 'Enable Product Reviews', desc: 'Allow verified purchase reviews', on: true },
               { label: 'Enable Compare Products', desc: 'Side-by-side product comparison', on: false },
               { label: 'Maintenance Mode', desc: 'Temporarily take the store offline', on: false },
-            ].map(f => {
-              const [on, setOn] = useState(f.on)
-              return (
-                <div key={f.label} className="flex items-center justify-between py-2 border-b border-[#F4F4F8] last:border-0">
-                  <div>
-                    <p className="text-sm font-semibold text-[#111118]">{f.label}</p>
-                    <p className="text-xs text-[#9B9BB8]">{f.desc}</p>
-                  </div>
-                  <Toggle on={on} onChange={setOn} />
-                </div>
-              )
-            })}
+            ].map(f => (
+              <FeatureToggleItem key={f.label} label={f.label} desc={f.desc} defaultOn={f.on} />
+            ))}
           </div>
         </div>
       )}
@@ -205,18 +210,9 @@ export default function SettingsAdmin({ onNavigate: _ }: Props) {
               { label: 'Free shipping minimum', desc: 'Orders over $75 qualify for free standard shipping', on: true },
               { label: 'Free shipping for VIP customers', desc: 'All VIP segment orders ship free regardless of total', on: false },
               { label: 'Apply free shipping to all vendors', desc: 'Platform absorbs shipping cost across all vendors', on: false },
-            ].map(f => {
-              const [on, setOn] = useState(f.on)
-              return (
-                <div key={f.label} className="flex items-center justify-between py-2 border-b border-[#F4F4F8] last:border-0">
-                  <div>
-                    <p className="text-sm font-semibold text-[#111118]">{f.label}</p>
-                    <p className="text-xs text-[#9B9BB8]">{f.desc}</p>
-                  </div>
-                  <Toggle on={on} onChange={setOn} />
-                </div>
-              )
-            })}
+            ].map(f => (
+              <FeatureToggleItem key={f.label} label={f.label} desc={f.desc} defaultOn={f.on} />
+            ))}
           </div>
         </div>
       )}
@@ -235,15 +231,9 @@ export default function SettingsAdmin({ onNavigate: _ }: Props) {
               { label: 'Vendor payout processed', on: true },
               { label: 'Customer review submitted', on: false },
               { label: 'Dispute raised', on: true },
-            ].map(n => {
-              const [on, setOn] = useState(n.on)
-              return (
-                <div key={n.label} className="flex items-center justify-between py-2 border-b border-[#F4F4F8] last:border-0">
-                  <p className="text-sm text-[#111118]">{n.label}</p>
-                  <Toggle on={on} onChange={setOn} />
-                </div>
-              )
-            })}
+            ].map(n => (
+              <FeatureToggleItem key={n.label} label={n.label} defaultOn={n.on} />
+            ))}
           </div>
 
           <div className="bg-white rounded-xl border border-[#E2E2EC] p-5 space-y-4">
