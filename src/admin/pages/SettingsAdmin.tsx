@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { AdminSection } from '../adminData'
 import { useSession } from '@/state/session-store'
+import { updateAdminProfile, updateAdminPassword } from '@/api/admin'
 
 type Props = { onNavigate: (s: AdminSection) => void }
 
@@ -355,18 +356,22 @@ function AdminSecurityTab() {
   const [profileMessage, setProfileMessage] = useState<{ text: string; success: boolean } | null>(null)
   const [passwordMessage, setPasswordMessage] = useState<{ text: string; success: boolean } | null>(null)
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault()
     setUpdatingProfile(true)
     setProfileMessage(null)
 
-    setTimeout(() => {
-      setUpdatingProfile(false)
-      setProfileMessage({ text: 'Admin profile & username updated successfully!', success: true })
-    }, 800)
+    const res = await updateAdminProfile(session.token, { fullName, email })
+    setUpdatingProfile(false)
+
+    if (res.success) {
+      setProfileMessage({ text: 'Admin profile & email updated successfully in database!', success: true })
+    } else {
+      setProfileMessage({ text: res.error.message || 'Failed to update profile.', success: false })
+    }
   }
 
-  const handleUpdatePassword = (e: React.FormEvent) => {
+  const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setPasswordMessage(null)
 
@@ -381,13 +386,17 @@ function AdminSecurityTab() {
     }
 
     setUpdatingPassword(true)
-    setTimeout(() => {
-      setUpdatingPassword(false)
+    const res = await updateAdminPassword(session.token, { currentPassword, newPassword })
+    setUpdatingPassword(false)
+
+    if (res.success) {
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
-      setPasswordMessage({ text: 'Super Admin password updated successfully!', success: true })
-    }, 1000)
+      setPasswordMessage({ text: 'Super Admin password updated successfully in database!', success: true })
+    } else {
+      setPasswordMessage({ text: res.error.message || 'Failed to update password. Please check your current password.', success: false })
+    }
   }
 
   return (

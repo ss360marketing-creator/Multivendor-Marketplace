@@ -331,3 +331,19 @@ export function deleteAdminCustomer(token: string, id: string) {
     token,
   })
 }
+
+export function updateAdminProfile(token: string | null, body: { fullName?: string; email?: string }) {
+  return apiRequest<{ user: { id: string; email: string; fullName: string; role: string } }>('/api/v1/auth/profile', {
+    method: 'PATCH',
+    token,
+    body,
+  })
+}
+
+export function updateAdminPassword(token: string | null, body: { currentPassword?: string; newPassword?: string }) {
+  return apiRequest<{ message: string }>('/api/v1/auth/password', {
+    method: 'PATCH',
+    token,
+    body,
+  })
+}

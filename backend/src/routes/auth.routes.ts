@@ -199,4 +199,100 @@ export async function registerAuthRoutes(app: FastifyInstance) {
       },
     }
   })
+
+  app.patch('/auth/profile', { preHandler: requireAuthentication() }, async (request, reply) => {
+    const body = request.body as { fullName?: string; email?: string }
+    const fullName = body.fullName?.trim()
+    const email = body.email?.trim().toLowerCase()
+
+    if (!fullName && !email) {
+      return reply.code(400).send({
+        success: false,
+        error: { code: 'INVALID_PAYLOAD', message: 'Full name or email is required.' },
+      })
+    }
+
+    if (email) {
+      const existing = await prisma.user.findFirst({
+        where: { email, NOT: { id: request.auth!.userId } },
+      })
+      if (existing) {
+        return reply.code(409).send({
+          success: false,
+          error: { code: 'EMAIL_EXISTS', message: 'This email is already in use by another account.' },
+        })
+      }
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: request.auth!.userId },
+      data: {
+        ...(fullName ? { fullName } : {}),
+        ...(email ? { email } : {}),
+      },
+    })
+
+    return reply.send({
+      success: true,
+      data: {
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          fullName: updatedUser.fullName,
+          role: updatedUser.role,
+        },
+      },
+    })
+  })
+
+  app.patch('/auth/password', { preHandler: requireAuthentication() }, async (request, reply) => {
+    const body = request.body as { currentPassword?: string; newPassword?: string }
+    const currentPassword = body.currentPassword?.trim()
+    const newPassword = body.newPassword?.trim()
+
+    if (!currentPassword || !newPassword) {
+      return reply.code(400).send({
+        success: false,
+        error: { code: 'INVALID_PAYLOAD', message: 'Current password and new password are required.' },
+      })
+    }
+
+    if (newPassword.length < 6) {
+      return reply.code(400).send({
+        success: false,
+        error: { code: 'WEAK_PASSWORD', message: 'New password must be at least 6 characters long.' },
+      })
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: request.auth!.userId },
+    })
+
+    if (!user?.passwordHash) {
+      return reply.code(404).send({
+        success: false,
+        error: { code: 'USER_NOT_FOUND', message: 'User account not found.' },
+      })
+    }
+
+    const isValidCurrent = await verifyPassword(currentPassword, user.passwordHash)
+    if (!isValidCurrent) {
+      return reply.code(400).send({
+        success: false,
+        error: { code: 'INVALID_CURRENT_PASSWORD', message: 'Current password is incorrect.' },
+      })
+    }
+
+    const newPasswordHash = await hashPassword(newPassword)
+
+    await prisma.user.update({
+      where: { id: request.auth!.userId },
+      data: { passwordHash: newPasswordHash },
+    })
+
+    return reply.send({
+      success: true,
+      data: { message: 'Password updated successfully in database.' },
+    })
+  })
 }
