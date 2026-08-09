@@ -175,7 +175,7 @@ export default function ProductsAdmin({ onNavigate: _ }: Props) {
 
     if (session.token) {
       try {
-        await createAdminProduct(session.token, {
+        const res = await createAdminProduct(session.token, {
           title: fullProduct.title,
           vendorId: fullProduct.vendorId,
           vendor: fullProduct.vendor,
@@ -192,12 +192,15 @@ export default function ProductsAdmin({ onNavigate: _ }: Props) {
           installment: fullProduct.installment,
           status: fullProduct.status.toUpperCase(),
         })
+
+        if (res.success && res.data) {
+          fullProduct.id = res.data.id
+        }
       } catch {
         // Fallback for dev mode
       }
     }
 
-    // Update local table items
     setItems(prev => [fullProduct, ...prev])
 
     // Update global storefront catalog so new product is visible live on frontend!

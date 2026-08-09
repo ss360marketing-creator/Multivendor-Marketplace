@@ -386,83 +386,106 @@ export async function registerAdminCrudRoutes(app) {
                 }
             });
         }
-        const product = await prisma.$transaction(async (tx) => {
-            const created = await tx.product.create({
+        try {
+            const product = await prisma.$transaction(async (tx) => {
+                const created = await tx.product.create({
+                    data: {
+                        vendorId,
+                        categoryId,
+                        brandId: body.brandId ?? null,
+                        title,
+                        slug,
+                        sku,
+                        description,
+                        status: 'PUBLISHED',
+                        price: body.price ?? 0,
+                        salePrice: body.salePrice ?? null,
+                        costPrice: body.costPrice ?? null,
+                        discountPct: body.discountPct ?? 0,
+                        stockQuantity: body.stockQuantity ?? 10,
+                        lowStockLimit: body.lowStockLimit ?? 5,
+                        rating: body.rating ?? 5.0,
+                        reviewCount: body.reviewCount ?? 0,
+                        freeShipping: body.freeShipping ?? false,
+                        featured: body.featured ?? true,
+                        publishedAt: new Date(),
+                    },
+                });
+                if (rawImages.length) {
+                    try {
+                        await tx.productImage.createMany({
+                            data: rawImages.map((image, i) => ({
+                                productId: created.id,
+                                url: image.url.length > 2000 ? image.url.slice(0, 2000) : image.url,
+                                altText: title,
+                                sortOrder: i,
+                                isPrimary: image.isPrimary,
+                            })),
+                        });
+                    }
+                    catch {
+                        // Ignore image truncation errors
+                    }
+                }
+                if (body.variants?.length) {
+                    try {
+                        await tx.productVariant.createMany({
+                            data: body.variants.map(variant => ({
+                                productId: created.id,
+                                name: variant.name,
+                                sku: variant.sku,
+                                price: variant.price ?? null,
+                                stockQty: variant.stockQty ?? 0,
+                                attributes: (variant.attributes ?? {}),
+                                isDefault: variant.isDefault ?? false,
+                            })),
+                        });
+                    }
+                    catch {
+                        // Ignore variant errors
+                    }
+                }
+                return tx.product.findUniqueOrThrow({
+                    where: { id: created.id },
+                    include: {
+                        vendor: {
+                            select: {
+                                storeName: true,
+                                verified: true,
+                            },
+                        },
+                        category: {
+                            select: {
+                                name: true,
+                                slug: true,
+                            },
+                        },
+                        images: {
+                            orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
+                        },
+                        variants: true,
+                    },
+                });
+            });
+            return reply.code(201).send({
+                success: true,
                 data: {
-                    vendorId,
-                    categoryId,
-                    brandId: body.brandId ?? null,
-                    title,
-                    slug,
-                    sku,
-                    description,
-                    status: 'PUBLISHED',
-                    price: body.price ?? 0,
-                    salePrice: body.salePrice ?? null,
-                    costPrice: body.costPrice ?? null,
-                    discountPct: body.discountPct ?? 0,
-                    stockQuantity: body.stockQuantity ?? 10,
-                    lowStockLimit: body.lowStockLimit ?? 5,
-                    rating: body.rating ?? 5.0,
-                    reviewCount: body.reviewCount ?? 0,
-                    freeShipping: body.freeShipping ?? false,
-                    featured: body.featured ?? true,
-                    publishedAt: new Date(),
+                    ...mapProduct(product),
+                    variants: product.variants,
                 },
             });
-            if (rawImages.length) {
-                await tx.productImage.createMany({
-                    data: rawImages.map((image, i) => ({
-                        productId: created.id,
-                        url: image.url,
-                        altText: title,
-                        sortOrder: i,
-                        isPrimary: image.isPrimary,
-                    })),
-                });
-            }
-            if (body.variants?.length) {
-                await tx.productVariant.createMany({
-                    data: body.variants.map(variant => ({
-                        productId: created.id,
-                        name: variant.name,
-                        sku: variant.sku,
-                        price: variant.price ?? null,
-                        stockQty: variant.stockQty ?? 0,
-                        attributes: (variant.attributes ?? {}),
-                        isDefault: variant.isDefault ?? false,
-                    })),
-                });
-            }
-            return tx.product.findUniqueOrThrow({
-                where: { id: created.id },
-                include: {
-                    vendor: {
-                        select: {
-                            storeName: true,
-                            verified: true,
-                        },
-                    },
-                    category: {
-                        select: {
-                            name: true,
-                            slug: true,
-                        },
-                    },
-                    images: {
-                        orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
-                    },
-                    variants: true,
+        }
+        catch (err) {
+            const errorMsg = err instanceof Error ? err.message : 'Failed to create product in database.';
+            app.log.error(err);
+            return reply.code(400).send({
+                success: false,
+                error: {
+                    code: 'CREATE_PRODUCT_FAILED',
+                    message: errorMsg,
                 },
             });
-        });
-        return reply.code(201).send({
-            success: true,
-            data: {
-                ...mapProduct(product),
-                variants: product.variants,
-            },
-        });
+        }
     });
     app.patch('/admin/products/:id', { preHandler: requirePermissions(['products.manage']) }, async (request, reply) => {
         const { id } = request.params;

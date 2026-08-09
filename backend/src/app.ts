@@ -7,6 +7,7 @@ import { registerRoutes } from './routes/index.js'
 export function buildApp() {
   const app = Fastify({
     logger: env.nodeEnv === 'development' ? { level: 'info' } : true,
+    bodyLimit: 50 * 1024 * 1024,
   })
 
   app.register(cors, { origin: env.corsOrigin })
