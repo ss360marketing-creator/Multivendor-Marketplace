@@ -225,9 +225,13 @@ export default function ProductsAdmin({ onNavigate: _ }: Props) {
 
         if (res.success && res.data) {
           fullProduct.id = res.data.id
+        } else {
+          setError(res.error?.message || 'Failed to create product.')
+          return
         }
-      } catch {
-        // Fallback for dev mode
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Network error creating product.')
+        return
       }
     }
 

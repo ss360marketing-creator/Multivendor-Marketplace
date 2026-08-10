@@ -168,12 +168,9 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
 
     if (productResponse.success && productResponse.data.length > 0) {
       const liveProds = productResponse.data.map((product, index) => toProduct(product, index))
-      // Combine live products with custom added products, avoiding duplicates by ID
-      const existingIds = new Set(liveProds.map(p => p.id))
-      const extraCustom = customSaved.filter(p => !existingIds.has(p.id))
-      setProducts([...extraCustom, ...liveProds])
+      setProducts([...liveProds])
     } else {
-      setProducts([...customSaved])
+      setProducts([])
     }
 
     if (vendorResponse.success && vendorResponse.data.length > 0) {

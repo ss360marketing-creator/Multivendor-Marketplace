@@ -555,12 +555,13 @@ export async function registerAdminCrudRoutes(app: FastifyInstance) {
         })
       }
 
-      if (!vendorId) {
-        const firstVendor = await prisma.vendorProfile.findFirst({ select: { id: true } })
+      if (!vendorId || vendorId.length < 10) {
+        const matchingVendor = body.vendor ? await prisma.vendorProfile.findFirst({ where: { storeName: body.vendor }, select: { id: true } }) : null
+        const firstVendor = matchingVendor ?? (await prisma.vendorProfile.findFirst({ select: { id: true } }))
         if (firstVendor) vendorId = firstVendor.id
       }
 
-      if (!categoryId) {
+      if (!categoryId || categoryId.length < 10) {
         const matchingCategory = body.category
           ? await prisma.category.findFirst({
               where: {
@@ -833,13 +834,21 @@ export async function registerAdminCrudRoutes(app: FastifyInstance) {
       const { id } = request.params as { id: string }
 
       try {
-        await prisma.product.delete({ where: { id } })
-      } catch {
+        await prisma.$transaction([
+          prisma.orderItem.deleteMany({ where: { productId: id } }),
+          prisma.inventoryMovement.deleteMany({ where: { productId: id } }),
+          prisma.review.deleteMany({ where: { productId: id } }),
+          prisma.wishlistItem.deleteMany({ where: { productId: id } }),
+          prisma.productVariant.deleteMany({ where: { productId: id } }),
+          prisma.productImage.deleteMany({ where: { productId: id } }),
+          prisma.product.delete({ where: { id } }),
+        ])
+      } catch (err: unknown) {
         return reply.code(404).send({
           success: false,
           error: {
-            code: 'PRODUCT_NOT_FOUND',
-            message: 'Product not found.',
+            code: 'PRODUCT_DELETE_FAILED',
+            message: err instanceof Error ? err.message : 'Product not found or could not be deleted.',
           },
         })
       }
