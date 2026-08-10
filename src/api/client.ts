@@ -27,12 +27,17 @@ export function getApiBaseUrl() {
 }
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
+  const headers: Record<string, string> = {
+    ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
+  }
+
+  if (options.body !== undefined) {
+    headers['Content-Type'] = 'application/json'
+  }
+
   const response = await fetch(`${getApiBaseUrl()}${path}`, {
     method: options.method ?? 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
-    },
+    headers,
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
   })
 

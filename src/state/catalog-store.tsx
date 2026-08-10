@@ -37,14 +37,12 @@ const CatalogContext = createContext<CatalogContextValue | null>(null)
 const CATEGORY_COLORS = ['#EEF2FF', '#F0FDF4', '#FFF7ED', '#FDF4FF', '#FFF1F2', '#F0F9FF', '#F5F3FF', '#FEFCE8']
 
 function toCategory(live: { id: string; name: string; slug: string; image: string | null; count: number }, index: number): Category {
-  const fallback = fallbackCategories.find(category => category.slug === live.slug)
-
   return {
     name: live.name,
     slug: live.slug,
-    image: live.image || fallback?.image || 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=450&fit=crop&auto=format',
+    image: live.image || 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&h=450&fit=crop&auto=format',
     count: live.count,
-    color: fallback?.color || CATEGORY_COLORS[index % CATEGORY_COLORS.length],
+    color: CATEGORY_COLORS[index % CATEGORY_COLORS.length],
   }
 }
 
@@ -75,8 +73,6 @@ function toProduct(
   },
   index: number,
 ): Product {
-  const fallback = fallbackProducts[index % fallbackProducts.length]
-
   return {
     id: live.id,
     title: live.title,
@@ -88,18 +84,18 @@ function toProduct(
     price: live.price,
     originalPrice: live.originalPrice,
     discount: live.discount,
-    image: live.image || fallback.image,
-    images: live.images?.length ? live.images : fallback.images,
+    image: live.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=600&fit=crop&auto=format',
+    images: live.images?.length ? live.images : [live.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop&auto=format'],
     category: live.category,
     categorySlug: live.categorySlug,
     freeShipping: live.freeShipping,
     badge: live.badge,
     stock: live.stock,
-    installment: live.installment || fallback.installment,
-    colors: live.colors?.length ? live.colors : fallback.colors,
-    sizes: live.sizes?.length ? live.sizes : fallback.sizes,
-    description: live.description || fallback.description,
-    features: live.features?.length ? live.features : fallback.features,
+    installment: live.installment,
+    colors: live.colors?.length ? live.colors : [],
+    sizes: live.sizes?.length ? live.sizes : [],
+    description: live.description || 'No description provided.',
+    features: live.features?.length ? live.features : [],
   }
 }
 
@@ -119,20 +115,18 @@ function toVendor(
   },
   index: number,
 ): Vendor {
-  const fallback = fallbackVendors[index % fallbackVendors.length]
-
   return {
     id: live.id,
     name: live.name,
-    logo: live.logo || fallback.logo,
-    cover: live.cover || fallback.cover,
+    logo: live.logo || 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=80&h=80&fit=crop&auto=format',
+    cover: live.cover || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=300&fit=crop&auto=format',
     rating: live.rating,
     productCount: live.productCount,
     positiveFeedback: live.positiveFeedback,
     followers: live.followers,
     verified: live.verified,
-    responseTime: live.responseTime || fallback.responseTime,
-    tagline: live.tagline || fallback.tagline,
+    responseTime: live.responseTime,
+    tagline: live.tagline,
   }
 }
 
@@ -146,12 +140,11 @@ function getSavedCustomProducts(): Product[] {
 }
 
 export function CatalogProvider({ children }: { children: ReactNode }) {
-  const [categories, setCategories] = useState(fallbackCategories)
+  const [categories, setCategories] = useState<Category[]>([])
   const [products, setProducts] = useState<Product[]>(() => {
-    const custom = getSavedCustomProducts()
-    return [...custom, ...fallbackProducts]
+    return getSavedCustomProducts()
   })
-  const [vendors, setVendors] = useState(fallbackVendors)
+  const [vendors, setVendors] = useState<Vendor[]>([])
   const [orders, setOrders] = useState<CatalogOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -180,7 +173,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
       const extraCustom = customSaved.filter(p => !existingIds.has(p.id))
       setProducts([...extraCustom, ...liveProds])
     } else {
-      setProducts([...customSaved, ...fallbackProducts])
+      setProducts([...customSaved])
     }
 
     if (vendorResponse.success && vendorResponse.data.length > 0) {

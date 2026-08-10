@@ -138,6 +138,7 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
         images: {
           orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
         },
+        variants: true,
       },
     })
 
@@ -163,6 +164,8 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
         badge: product.featured ? 'bestseller' : undefined,
         installment: undefined,
         description: product.description,
+        colors: Array.from(new Set(product.variants.map(v => (v.attributes as any)?.Color).filter(Boolean))),
+        sizes: Array.from(new Set(product.variants.map(v => (v.attributes as any)?.Size).filter(Boolean))),
       })),
       meta: { total: products.length },
     }
@@ -224,8 +227,8 @@ export async function registerCatalogRoutes(app: FastifyInstance) {
         installment: undefined,
         description: product.description,
         features: [],
-        colors: [],
-        sizes: product.variants.map(variant => variant.name),
+        colors: Array.from(new Set(product.variants.map(v => (v.attributes as any)?.Color).filter(Boolean))),
+        sizes: Array.from(new Set(product.variants.map(v => (v.attributes as any)?.Size).filter(Boolean))),
       },
     }
   })

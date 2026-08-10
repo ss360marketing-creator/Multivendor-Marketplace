@@ -173,6 +173,35 @@ export default function ProductsAdmin({ onNavigate: _ }: Props) {
       status: productData.status ?? 'published',
     }
 
+    const generatedVariants: Array<{ name: string; sku: string; price: number; stockQty: number; attributes: Record<string, string> }> = []
+    const colors = productData.colors && productData.colors.length > 0 ? productData.colors : [null]
+    const sizes = productData.sizes && productData.sizes.length > 0 ? productData.sizes : [null]
+
+    if (colors[0] !== null || sizes[0] !== null) {
+      colors.forEach(color => {
+        sizes.forEach(size => {
+          const attrs: Record<string, string> = {}
+          if (color) attrs.Color = color
+          if (size) attrs.Size = size
+
+          const variantNameParts = []
+          if (color) variantNameParts.push(color)
+          if (size) variantNameParts.push(size)
+          const variantName = variantNameParts.join(' - ')
+
+          const variantSku = `SKU-${Date.now().toString().slice(-6)}-${variantNameParts.map(p => p.slice(0, 3).toUpperCase()).join('')}`
+
+          generatedVariants.push({
+            name: variantName,
+            sku: variantSku,
+            price: fullProduct.price,
+            stockQty: fullProduct.stock,
+            attributes: attrs,
+          })
+        })
+      })
+    }
+
     if (session.token) {
       try {
         const res = await createAdminProduct(session.token, {
@@ -191,6 +220,7 @@ export default function ProductsAdmin({ onNavigate: _ }: Props) {
           badge: fullProduct.badge,
           installment: fullProduct.installment,
           status: fullProduct.status.toUpperCase(),
+          variants: generatedVariants.length > 0 ? generatedVariants : undefined,
         })
 
         if (res.success && res.data) {

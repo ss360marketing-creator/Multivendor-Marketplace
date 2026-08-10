@@ -151,6 +151,14 @@ export function createAdminProduct(token: string, body: {
   sizes?: string[]
   features?: string[]
   status?: string
+  variants?: Array<{
+    name: string
+    sku: string
+    price?: number | null
+    stockQty?: number
+    attributes?: Record<string, unknown>
+    isDefault?: boolean
+  }>
 }) {
   return apiRequest<AdminProduct>('/api/v1/admin/products', {
     method: 'POST',
